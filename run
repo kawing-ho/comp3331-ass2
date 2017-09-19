@@ -18,12 +18,12 @@ if [ $RATE -le 0 ]; then echo "Only positive integers allowed !"; exit ; fi
 TOP="sampletop.txt"
 WORK="samplework.txt"
 
-echo "Using files '$TOP' and '$WORK' ...\n"
-sleep 1;
+echo "Using files '$TOP' and '$WORK' ..."
 
-#python Routing Performance.py ....
+if [ $SCHEME == "P" ]; then SCHEME="PACKET"; fi
+if [ $SCHEME == "C" ]; then SCHEME="CIRCUIT"; fi
+echo -e "Running python RoutingPerformance.py $SCHEME $ROUTE $TOP $WORK $RATE\n"
+sleep 1
 
-
-
-
+python RoutingPerformance.py $SCHEME $ROUTE $TOP $WORK $RATE
 
