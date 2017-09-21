@@ -63,7 +63,12 @@ class Graph:
 
     def addVertex(self, node):
         new = Vertex(node)
-        if new not in self.vertices: self.vertices.append(new)
+
+        #Check if the same node exists in the list or not
+        for v in self.vertices:
+        	if(v.getID() == node): return new
+
+        self.vertices.append(new)
         return new
 
     def addNeighbour(self, vertex, neighbour):   #?
