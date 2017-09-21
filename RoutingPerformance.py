@@ -61,25 +61,28 @@ class Graph:
         self.edges = []
         self.vertices = []
 
-    def add_vertex(self, node):
+    def addVertex(self, node):
         new = Vertex(node)
         if new not in self.vertices: self.vertices.append(new)
         return new
 
-    def addNeighbour(self, vertex, neighbour):
-    	for v in self.vertices:
-    		if(v.getID() == vertex.getID()):
-    			v.addNeighbour(neighbour)
-    		if(v.getID() == neighbour.getID()):
-    			v.addNeighbour(vertex)
+    def addNeighbour(self, vertex, neighbour):   #?
 
-    def get_vertex(self, n):
+    	node1 = self.getVertex(vertex)
+    	node2 = self.getVertex(neighbour)
+    	for v in self.vertices:
+    		if(v.getID() == node1.getID()):
+    			v.addNeighbour(node2)
+    		if(v.getID() == node2.getID()):
+    			v.addNeighbour(node1)
+
+    def getVertex(self, n):
         for v in self.vertices:
             if (v.getID() == n): return v
 
         return None
 
-    def add_edge(self, frm, to, cost = 0):
+    def addEdge(node1, node2, delay, max):
         if frm not in self.vert_dict:
             self.add_vertex(frm)
         if to not in self.vert_dict:
@@ -88,11 +91,15 @@ class Graph:
         self.vert_dict[frm].add_neighbor(self.vert_dict[to], cost)
         self.vert_dict[to].add_neighbor(self.vert_dict[frm], cost)
 
-    def get_vertices(self):
-        return self.vert_dict.keys()
+    def getVertices(self):
+    	ret = [];
+    	for v in self.vertices:
+    		ret.append(v.getID());
+        return ret
 
     def show(self):
-    	print "Work in progress"
+    	print "Vertices :" + str(self.getVertices())
+    	print "Edges    :" + str(self.edges)
 
 #Just some simple error-checking in args
 if(len(sys.argv) != 6): print "Usage: python RoutingPerformance.py <CIRCUIT/PACKET> <SHP/SDP/LLP> <topology-file> <workload-file> <rate>"; exit()
@@ -118,33 +125,33 @@ for line in top.readlines():
 	maxCapacity = match.group(4)
 
 	#Add node to graph if it doesn't exist
-	g.add_vertex(node1)
-	g.add_vertex(node2)
+	g.addVertex(node1); g.addVertex(node2)
+
+	#Add edge in the graph
+	#g.addEdge(node1,node2,dprop,maxCapacity)
 
 	#Add to each other's neighbours
-
-
-	#If node exists 
-	     #Add neighbour
-	     #Add edge
+	g.addNeighbour(node1,node2)
 
 	#According to the format of the sample the input won't have duplicates so all good
 
+#Finish graph initialization
+g.show()
+top.close()
 
+#Parse workload file 
+for line in work.readlines():
+	match = re.search("(\d+) ([A-Z]) ([A-Z]) (\d+)",line)
 
-
-#parse workload file 
+	time = match.group(1)
+	requester = match.group(2)
+	recipient = match.group(3)
+	duration = match.group(4)
 
 #the type of network scheme defines the behaviour of the algorithms ? 
-
-#Model data structure from contents of "topology"
-
-#Extract data from "workload"
 
 #Choose which routing algorithm to run
 
 
-
-top.close()
 work.close()
 
