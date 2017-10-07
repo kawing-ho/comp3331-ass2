@@ -1,17 +1,19 @@
-Assignment 2 with Andy ! 
+Assignment 2 with Andy !
 
 Evaluate performance of 3 different routing algos over a VIRTUAL CIRCUIT NETWORK
 network with a connection-based network layer, unlike Internet) + VIRTUAL PACKET NETWORK
 (connection-less network layer of the Internet)
 
+---I think you mean 2 different network types instead of 3 different routing algos
+
 Basically routing protocols :(
 
 - CIRCUIT or PACKET
-- SHP, SDP, LLP 
+- SHP, SDP, LLP
 
 - topology_file
 - workload_file (virtual connection requests)
-- packet_rate (positive int value)
+- packet_rate (positive int value, packets per second)
 
 Diff: VCN and VPNPN uses routing protocol to determine path for each packet independently
 Invoke the protocol N times (numpackets)
@@ -19,16 +21,16 @@ Invoke the protocol N times (numpackets)
 Simple example of network topology example
 for 4 routers
 ABCD  -- all links bidirectional
-A B 10 19 
+A B 10 19
 A C 15 20
 B C 20 20
 B D 30 70
-C D 8 20 
+C D 8 20
 
 at most 1 direct link between any two nodes
 can assume no isolated nodes
 
-Task1: 
+Task1:
 - Read topology file and construct appropriate data structure (graph)
 names : A-Z
 ms : 0 < d < 200
@@ -42,23 +44,23 @@ and attempt to establish the virtual circuits in the network
 according to the routing algorithm in use
 
 Time (0 seconds up to 6 digits)
-Origin + Dest 
-Time duration the connection remains active 
+Origin + Dest
+Time duration the connection remains active
 
 assume all virtual connections have same value for packet rate
-numPackets/s  
+numPackets/s
 
 Program has to select the "best" route depending on the routing protocol in use
 each circuit consumes exactly one unit of link capacity
 
-not routed successfully = blocked 
+not routed successfully = blocked
 (what happens after its blocked?)
 
 packets will be immediately discarded/dropped
 count and report number of blocked packets
 
 Task 3: Routing protocol
-all link state routing 
+all link state routing
 but different "cost" metric / heuristics
 
 SHP
@@ -67,21 +69,21 @@ number of hops (cost of each link set to 1)
 - ignores delay and load associated with link
 
 SDP
-- shortest available path 
+- shortest available path
 cumulative propagation delay traversing the chosen links in the path
 (cost of each link set to the prop delay)
-- ignores numhops and load 
+- ignores numhops and load
 
 LLP
-least loaded path 
+least loaded path
 maximum load on any link in the path
 ratio of current number of active virtual circuits / capacity of link'
 
 Path cost in LLP is not additive
-Link costs change with time 
+Link costs change with time
 ^this one seems harder to implement
 
-Ties broken arbitrarily 
+Ties broken arbitrarily
 randomly choose paths of equal costs
 
 keep track of time
@@ -98,14 +100,14 @@ Stats:
 - avg numHops per successfully routed circuit
 - avg cummulatiuve prog delay per successfully routed circuit
 
-max decimal places is 2 
+max decimal places is 2
 ------------------------
 Tips:
--> model the network topology 
+-> model the network topology
 -> focus on getting ONE routing algo working
     (SHP easiest)
     test your Dijkstra's algo to make sure its working properly
-    
+
  > SDP then LLP (slightly harder)
  > Test routing algos with small NT and small WK
  > Extend program to support both network types
@@ -116,4 +118,4 @@ Tips:
 Submit:
 - prog file
 - 3 page report
-- max 5 min sreencast of program ?? wtf 
+- max 5 min sreencast of program ?? wtf
