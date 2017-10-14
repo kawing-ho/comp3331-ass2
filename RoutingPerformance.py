@@ -38,12 +38,15 @@ def reorder(one,two): return (one + two) if (ord(one) < ord(two)) else (two + on
 #return list of edges that involve that node
 def getEdges(node,g): return [edge for edge in g if node in edge]
 
+#SHP algorithm
 def ShortestHop():
 	print("Shortest Hop Path !")
 
+#SDP algorithm
 def ShortestDelay():
 	print("Shortest Delay Path !")
 
+#LLP algorithm 
 def LeastLoad():
 	print("Least Load Path !")
 
@@ -80,8 +83,8 @@ for line in top.readlines():
 #Finish graph initialization
 top.close()
 
-print "\nCan we find C ?"        # ------------------------
-myList = getEdges("C",Graph)   #  EXAMPLE , DELETE LATER
+print "\nCan we find C ?"      # ------------------------
+myList = getEdges("C",Graph.keys())   #  EXAMPLE , DELETE LATER
 print myList				   # ------------------------
 
 
@@ -93,7 +96,7 @@ for line in work.readlines():
 	targetEdge = reorder(match.group(2), match.group(3))
 	duration = match.group(4)
 
-	#the type of network scheme defines the behaviour of the algorithms ? 
+	#the type of network scheme defines the behaviour of the algorithms ?  (not sure yet tbh)
 
 	#Choose which routing algorithm to run
 	if(algorithm == "SHP"): 
@@ -102,8 +105,6 @@ for line in work.readlines():
 		ShortestDelay()
 	else:
 		LeastLoad()
-
-
 
 
 work.close()
