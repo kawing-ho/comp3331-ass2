@@ -8,6 +8,11 @@ import sys, re
 #Code referrenced from: http://www.bogotobogo.com/python/python_graph_data_structures.php
 #Graph has nodes / Nodes have edges / Edges have Capacity + Prop Delay tuple
 
+#How to approach time ?
+# - we could rely on system time and use sleeps and other stuff 
+# - we could also do our own clock cycles to simulate time 
+
+
 '''
 So I decided its better to not make a separate Graph object because dealing with duplicates is a pain in the ass
 Instead I propose we use this way of using graphs instead 
@@ -67,6 +72,9 @@ except Exception as e: print str(e); exit()
 Graph = {} #Graph is a dict containing dicts
 scheme = sys.argv[1]
 algorithm = sys.argv[2]
+rate = int(sys.argv[5])            # eg. if rate = 2 it means 2 packets/s 
+packetTime = float(1.0 / rate)	   # that means each packet takes 0.5 s to transmit
+time = 0
 
 #Graph initialization
 for line in top.readlines():
@@ -83,14 +91,14 @@ for line in top.readlines():
 #Finish graph initialization
 top.close()
 
-print "\nCan we find C ?"      # ------------------------
+print "\nCan we find C ?"             # ------------------------
 myList = getEdges("C",Graph.keys())   #  EXAMPLE , DELETE LATER
-print myList				   # ------------------------
+print myList				          # ------------------------
 
 
 #Parse workload file 
 for line in work.readlines():
-	match = re.search("(\d+) ([A-Z]) ([A-Z]) (\d+)",line)
+	match = re.search("\.?(\d+) ([A-Z]) ([A-Z]) (\d+)",line)
 
 	time = match.group(1)
 	targetEdge = reorder(match.group(2), match.group(3))
@@ -108,3 +116,22 @@ for line in work.readlines():
 
 
 work.close()
+
+
+
+
+'''
+Similarities and Differences of Virtual Circuit / Virtual Packet
+
+- Number of requests = number of lines in workload file
+- When a path is determined, the whole path is reserved for that time frame (eg. A->B->D for time 0-0.5 load increase by 1)
+- In some cases even though the packets are blocked the reservation still happens and the request is still counted (I'll look more into this later)*
+- once the path has been chosen and if we encounter that one of the links is fully occupied, either that individual packet is dropped (for VP) or the whole
+  request is dropped (for VC)
+- 
+
+
+- in VC algorithm only needs to be run once 
+- in VP algorithm needs to be run once for each packet (and the scenarios (aka load) may change in between runs)
+
+'''
