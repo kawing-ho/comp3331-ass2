@@ -1,7 +1,7 @@
 #!/usr/bin/python
-#COMP3331 Assignment2 
-#z5087077 Ka Wing Ho 
-#z5113471 Andy Yang 
+#COMP3331 Assignment2
+#z5087077 Ka Wing Ho
+#z5113471 Andy Yang
 
 import sys, re
 
@@ -9,7 +9,7 @@ import sys, re
 #Graph has nodes / Nodes have edges / Edges have Capacity + Prop Delay tuple
 
 
-#Graph stores 
+#Graph stores
 # - List of nodes (each node will know about its neighbours)
 # - List of edges (no duplicates) , (edges will have Dprop,MaxCap,CurrCap)
 
@@ -71,7 +71,7 @@ class Graph:
         self.vertices.append(new)
         return new
 
-    def addNeighbour(self, vertex, neighbour):   #?
+    def addNeighbour(self, vertex, neighbour):   #? how does this work?
 
     	node1 = self.getVertex(vertex)
     	node2 = self.getVertex(neighbour)
@@ -122,29 +122,29 @@ except Exception as e: print str(e); exit()
 #Graph initialization
 g = Graph()
 for line in top.readlines():
-	match = re.search("([A-Z]) ([A-Z]) (\d+) (\d+)",line)
-	
-	node1 = match.group(1)  #just a character like "A"
-	node2 = match.group(2)  #just a character like "B" 
-	dprop = match.group(3)
-	maxCapacity = match.group(4)
+    print line
+    match = re.search("([A-Z]) ([A-Z]) (\d+) (\d+)",line)
+
+    node1 = match.group(1)  #just a character like "A"
+    node2 = match.group(2)  #just a character like "B"
+    dprop = match.group(3)  #isnt this suppose to be the propgation delay??
+    maxCapacity = match.group(4)  #number of simultaneous virtual circuits
 
 	#Add node to graph if it doesn't exist
-	g.addVertex(node1); g.addVertex(node2)
+    g.addVertex(node1); g.addVertex(node2)
 
 	#Add edge in the graph
 	#g.addEdge(node1,node2,dprop,maxCapacity)
 
 	#Add to each other's neighbours
-	g.addNeighbour(node1,node2)
-
+    g.addNeighbour(node1,node2)
 	#According to the format of the sample the input won't have duplicates so all good
-
+    g.show()
 #Finish graph initialization
 g.show()
 top.close()
 
-#Parse workload file 
+#Parse workload file
 for line in work.readlines():
 	match = re.search("(\d+) ([A-Z]) ([A-Z]) (\d+)",line)
 
@@ -153,10 +153,9 @@ for line in work.readlines():
 	recipient = match.group(3)
 	duration = match.group(4)
 
-#the type of network scheme defines the behaviour of the algorithms ? 
+#the type of network scheme defines the behaviour of the algorithms ?
 
 #Choose which routing algorithm to run
 
 
 work.close()
-
