@@ -4,6 +4,7 @@
 #z5113471 Andy Yang
 
 import sys, re
+import time, math, threading
 
 #Code referrenced from: http://www.bogotobogo.com/python/python_graph_data_structures.php
 #Graph has nodes / Nodes have edges / Edges have Capacity + Prop Delay tuple
@@ -77,48 +78,55 @@ scheme = sys.argv[1]
 algorithm = sys.argv[2]
 rate = int(sys.argv[5])            # eg. if rate = 2 it means 2 packets/s
 packetTime = float(1.0 / rate)	   # that means each packet takes 0.5 s to transmit
-time = 0
+startOfProgram = time.time()
+Wingstime = 0
+
 
 #Graph initialization
 for line in top.readlines():
-	match = re.search("([A-Z]) ([A-Z]) (\d+) (\d+)",line)
+    match = re.search("([A-Z]) ([A-Z]) (\d+) (\d+)",line)
 
-	edge = reorder(match.group(1), match.group(2))
-	propDelay = match.group(3)
-	maxCapacity = match.group(4)
+    edge = reorder(match.group(1), match.group(2))
+    propDelay = match.group(3)
+    maxCapacity = match.group(4)
 
-	Graph[edge] = {"delay":propDelay, "max":maxCapacity, "load":0}
+    Graph[edge] = {"delay":propDelay, "max":maxCapacity, "load":0}
 
-	print str(edge) + " -> " + str(Graph[edge])  #EXAMPLE , DELETE LATER
+    print str(edge) + " -> " + str(Graph[edge])  #EXAMPLE , DELETE LATER
 
 #Finish graph initialization
 top.close()
 
+
+print "It takes ",time.time()-startOfProgram,"to finish initialization"
 print "\nCan we find C ?"             # ------------------------
 myList = getEdges("C",Graph.keys())   #  EXAMPLE , DELETE LATER
 print myList				          # ------------------------
 
-
+startTime = time.time()
 #Parse workload file
 for line in work.readlines():
-	match = re.search("\.?(\d+) ([A-Z]) ([A-Z]) (\d+)",line)
+    match = re.search("\.?(\d+) ([A-Z]) ([A-Z]) (\d+)",line)
 
-	time = match.group(1)
-	targetEdge = reorder(match.group(2), match.group(3))
-	duration = match.group(4)
+    Wingstime = match.group(1)
+    targetEdge = reorder(match.group(2), match.group(3))
+    duration = match.group(4)
 
-	#the type of network scheme defines the behaviour of the algorithms ?  (not sure yet tbh)
-
-	#Choose which routing algorithm to run
-	if(algorithm == "SHP"):
-		ShortestHop()
-	elif(algorithm == "SDP"):
-		ShortestDelay()
-	else:
-		LeastLoad()
+    #the type of network scheme defines the behaviour of the algorithms ?  (not sure yet tbh)
+    print "Current time is", time.time() - startTime
+    #Choose which routing algorithm to run
+    if(algorithm == "SHP"):
+        ShortestHop()
+    elif(algorithm == "SDP"):
+        ShortestDelay()
+    else:
+        LeastLoad()
 
 
 work.close()
+
+
+print time.time()-startOfProgram
 
 
 
