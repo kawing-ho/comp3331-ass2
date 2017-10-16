@@ -12,6 +12,13 @@ def reorder(one,two): return (one + two) if (ord(one) < ord(two)) else (two + on
 #return list of edges that involve that node
 def getEdges(node,g): return [edge for edge in g if node in edge]
 
+#return list of nodes in the graph
+def getNodes(g): 
+	nodes = set()
+	for edge in g.keys():
+		[nodes.add(node) for node in edge]
+	return sorted(list(nodes))
+
 #SHP algorithm
 def ShortestHop():
 	print("Shortest Hop Path !")
@@ -23,6 +30,24 @@ def ShortestDelay():
 #LLP algorithm
 def LeastLoad():
 	print("Least Load Path !")
+
+# input : Source, Dest, Graph, algo
+# output: Path as a list from Src -> Dest
+def dijkstra(source, dest, graph, algorithm):   #will get a prototype for Shortest Hop Path working tomorrow 
+	path = ""
+	visited = set();
+	visited.add(source)
+
+	nodes = getNodes(graph)
+
+	while nodes:
+		#do stuff
+		break
+
+	return path
+
+
+
 
 
 
@@ -92,7 +117,7 @@ work.close()
 
 
 print time.time()-startOfProgram
-
+print getNodes(Graph)
 
 
 
@@ -136,5 +161,14 @@ Problems of doing it this way:
   eg. if the very first connection starts at 0.1 and lasts for 12 seconds then the first CloseConnectionEvent will be at 12.1s
   in between now and then we can either wait or do other things , once the time hits 
 
+
+- The way the spec wants us to do it is 
+   - for each line in workload file
+   - read , parse , chuck it into the algorithm 
+   - algorithm determines what path to take
+   - network scheme determines the timing for the packet(s) as well as how many times the algorithm will run
+   - duration of which resource is consumed 
+
+   - move on to next line
 
 '''
