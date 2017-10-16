@@ -6,41 +6,6 @@
 import sys, re
 import time, math, threading
 
-#Code referrenced from: http://www.bogotobogo.com/python/python_graph_data_structures.php
-#Graph has nodes / Nodes have edges / Edges have Capacity + Prop Delay tuple
-
-#use for data structure referrence https://docs.python.org/2/tutorial/datastructures.html
-
-#How to approach time ?
-# - we could rely on system time and use sleeps and other stuff
-# - we could also do our own clock cycles to simulate time
-
-
-
-'''
-So I decided its better to not make a separate Graph object because dealing with duplicates is a pain in the ass
-Instead I propose we use this way of using graphs instead
-- Dictionary of dictionaries to represent fields in edges  (edges are the keys)
-- eg.  Graph = {}
-       Graph["AB"] = {"delay":10,"max",5,"load",0}
-
-       then we can access these fields easily
-       if we want to get/set the load of edge AB just do
-
-       ABLoad = Graph["AB"]["load"]
-       or  Graph["AB"]["load"] = newABLoad
-
-       if we need to add new fields simply do
-
-       Graph["AB"]["newFIeld"] = newValue
-
-Some issues that we have to deal with (but should be easily done)
-Edges may come in wrong order eg. AB or BA (but we can have some convention like stricly sorted alphabetically edges)
-
-How do we find edges based on vertex ? eg. given C I need to consider all edges like AC , CD , CE,  FC .... (again see above)
-- to solve this we can just write a function to do Graph.keys() and return a list of all keys which contain "C"
-'''
-
 #returns the correct order of edge eg. "AB" -> "AB" , "BA" -> "AB"
 def reorder(one,two): return (one + two) if (ord(one) < ord(two)) else (two + one);
 
@@ -79,7 +44,6 @@ algorithm = sys.argv[2]
 rate = int(sys.argv[5])            # eg. if rate = 2 it means 2 packets/s
 packetTime = float(1.0 / rate)	   # that means each packet takes 0.5 s to transmit
 startOfProgram = time.time()
-Wingstime = 0
 
 
 #Graph initialization
@@ -106,7 +70,8 @@ print myList				          # ------------------------
 startTime = time.time()
 #Parse workload file
 for line in work.readlines():
-    match = re.search("\.?(\d+) ([A-Z]) ([A-Z]) (\d+)",line)
+    match = re.search("([\d\.]+) ([A-Z]) ([A-Z]) ([\d\.]+)",line)
+    if(match is None): continue
 
     Wingstime = match.group(1)
     targetEdge = reorder(match.group(2), match.group(3))
@@ -144,5 +109,32 @@ Similarities and Differences of Virtual Circuit / Virtual Packet
 
 - in VC algorithm only needs to be run once
 - in VP algorithm needs to be run once for each packet (and the scenarios (aka load) may change in between runs)
+
+'''
+
+'''
+Cases to consider:
+- Have to keep track of dozens of individual durations and start/end times
+- Only have one single unified timer 
+- Time doesn't wait for us when we are doing calculations (especially if we're trying to be precise)
+
+
+How I'd like to do it:
+- List/Dict of connections indexed by start time (as time moves forward we grab the first element off the list)
+   eg.  Connections[]
+        Connections[0.1234] = {edge, duration}
+        Connections[0.3456] = {edge, duration}
+- That would be the connection we are interested in at the moment, do whatever we need to do with it, and then delete the list element when we're done
+
+Problems of doing it this way:
+- If we delete it how do we know where to free up the connection from when the pakcets are sent 
+- Spec says we need to do it line by line from workload file, this method wouldn't really work properly if we did that 
+- 
+
+
+- We have a global variable to indicate the next "CloseConnectionEvent", every loop we check for this Event 
+  eg. if the very first connection starts at 0.1 and lasts for 12 seconds then the first CloseConnectionEvent will be at 12.1s
+  in between now and then we can either wait or do other things , once the time hits 
+
 
 '''
