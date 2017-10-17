@@ -66,6 +66,7 @@ def dijkstra(source, dest, graph, algorithm):
 	while True:
 
 		currentNode, currentDistance = PriorityQueue.pop(0)		#get node from PQ
+		#print "Just popped off " + currentNode + " " + str(currentDistance)
 		visited.add(currentNode)								#add node to visited
 
 		#if node is GOAL, fill out path and break
@@ -83,8 +84,10 @@ def dijkstra(source, dest, graph, algorithm):
 
 		for neighbour in neighbours:
 			if neighbour in visited: continue					#if neighbour in visited skip
+			else: visited.add(neighbour) 
 			currentEdge = reorder(neighbour,currentNode)
 			weight = 1 											#in the case of SHP weight = 1 for each edge
+			print "Adding " + neighbour + " " + str(currentDistance + weight) + " to PQ "
 			PriorityQueue.append((neighbour,currentDistance + weight))
 		
 
@@ -185,11 +188,15 @@ work.close()
 
 
 print time.time()-startOfProgram
-print "Testing out Dijkstra with A and D"
-pathz = dijkstra('A', 'D', Graph, algorithm)
-print str(pathz)
+print "=== Testing out Dijkstra with A and D ==="
+print str(dijkstra('A', 'D', Graph, algorithm))
 
-
+print "=== Testing out Dijkstra A and B ==="
+print str(dijkstra('A', 'B', Graph, algorithm))
+print "=== Testing out Dijkstra D and C ==="
+print str(dijkstra('D', 'C', Graph, algorithm))
+print "=== Testing out Dijkstra D and A ==="
+print str(dijkstra('D', 'A', Graph, algorithm))
 
 '''
 Similarities and Differences of Virtual Circuit / Virtual Packet
