@@ -20,29 +20,46 @@ def getNodes(g):
 	return sorted(list(nodes))
 
 #SHP algorithm
+#All weights = 1 since only hops counted
 def ShortestHop():
 	print("Shortest Hop Path !")
 
 #SDP algorithm
+#Weight = delay of that edge
 def ShortestDelay():
 	print("Shortest Delay Path !")
 
 #LLP algorithm
+#Weight = Load of that edge (very volatile as it can change in the middle of a connection)
 def LeastLoad():
 	print("Least Load Path !")
 
 # input : Source, Dest, Graph, algo
 # output: Path as a list from Src -> Dest
-def dijkstra(source, dest, graph, algorithm):   #will get a prototype for Shortest Hop Path working tomorrow 
+def dijkstra(source, dest, graph, algorithm):
 	path = ""
 	visited = set();
 	visited.add(source)
 
 	nodes = getNodes(graph)
 
-	while nodes:
-		#do stuff
-		break
+	while true:
+		print ""
+		#get node from PQ
+		#add node to visited
+
+		#if node is GOAL, fill out path and break
+
+
+		# I don't know how to do the triangulation thing where if A->C = 7 but A->B->C = 5 then change 7 to 5
+		# will look into that later as well ...
+
+
+		# look at neighbours and consider weights 
+		# if neighbour in visited skip
+		# add neighbours to PQ
+
+		#reshuffle PQ if necessary
 
 	return path
 
