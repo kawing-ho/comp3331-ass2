@@ -12,6 +12,10 @@ def reorder(one,two): return (one + two) if (ord(one) < ord(two)) else (two + on
 #return list of edges that involve that node
 def getEdges(node,g): return [edge for edge in g if node in edge]
 
+#return neighbours of a node
+def getNeighbours(node,g):
+	return None
+
 #return list of nodes in the graph
 def getNodes(g): 
 	nodes = set()
@@ -20,12 +24,12 @@ def getNodes(g):
 	return sorted(list(nodes))
 
 #SHP algorithm
-#All weights = 1 since only hops counted
+#All weights = 1 since only hops counted (same for all edges)
 def ShortestHop():
 	print("Shortest Hop Path !")
 
 #SDP algorithm
-#Weight = delay of that edge
+#Weight = delay of that edge (constant but different for every edge)
 def ShortestDelay():
 	print("Shortest Delay Path !")
 
@@ -37,31 +41,61 @@ def LeastLoad():
 # input : Source, Dest, Graph, algo
 # output: Path as a list from Src -> Dest
 def dijkstra(source, dest, graph, algorithm):
-	path = ""
-	visited = set();
-	visited.add(source)
-
+	path = {}						#Path is dict going backwards eg. path[B] = A
+	PriorityQueue = [(source,0)];   #PQ stores tuple of (node,distanceFromSource)
+	visited = set()
+	neighbours = set()
 	nodes = getNodes(graph)
 
 	while true:
-		print ""
-		#get node from PQ
-		#add node to visited
+
+		currentNode, currentDistance = PriorityQueue.pop(0)		#get node from PQ
+		visited.add(currentNode)								#add node to visited
 
 		#if node is GOAL, fill out path and break
+		if(currentNode == dest):
+			print("Found destination !")
+			break
 
 
 		# I don't know how to do the triangulation thing where if A->C = 7 but A->B->C = 5 then change 7 to 5
 		# will look into that later as well ...
+		
+		# look at neighbours and consider weights
+		for edge in currentNode.getEdges:
+			for node in edge: neighbours.add(node)
+
+		for neighbour in neighbours:
+			if neighbour in visited: continue					#if neighbour in visited skip
+			currentEdge = reorder(neighbour,currentNode)
+			weight = 1 											#in the case of SHP weight = 1 for each edge
+			PriorityQueue.append((neighbour,currentDistance + weight))
+		
+
+			#default behaviour: path[neighbour] = currentNode
+			path[neighbour] = currentNode
+			#advanced behaviour: triangulation will alter the path to something else if needed
+
+		#reshuffle PQ (sort by distance)
+		print str(PriorityQueue)    #before
+
+		print str(PriorityQueue)    #after
 
 
-		# look at neighbours and consider weights 
-		# if neighbour in visited skip
-		# add neighbours to PQ
+	#deconstruct / reconstruct path :
+	# eg. path[dest] = mid, path[mid] = source,
+	# res = []
+	# res = dest + []
+	# res = mid + dest + []
+	# res = source + mid + dest
 
-		#reshuffle PQ if necessary
+	res = []
+	node = dest
+	while (node != source):
+		res = [node] + res
+		node = path[node]
 
-	return path
+	return res
 
 
 
