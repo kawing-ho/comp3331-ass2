@@ -3,6 +3,12 @@
 #z5087077 Ka Wing Ho
 #z5113471 Andy Yang
 
+'''
+References : 
+(1)> List-sorting with tuples in them: https://stackoverflow.com/a/36075587
+(2)> ...
+'''
+
 import sys, re
 import time, math, threading
 
@@ -22,6 +28,16 @@ def getNodes(g):
 	for edge in g.keys():
 		[nodes.add(node) for node in edge]
 	return sorted(list(nodes))
+
+#comparator function for sorting PQ
+#-------(See reference (1))--------
+def distance_compare(a, b):
+	if a[1] < b[1]: return -1
+	elif a[1] == b[1]:
+		if a[0] > b[0]: return 1
+		else: return -1
+	else: return 1                
+#-----------------------------------
 
 #SHP algorithm
 #All weights = 1 since only hops counted (same for all edges)
@@ -47,7 +63,7 @@ def dijkstra(source, dest, graph, algorithm):
 	neighbours = set()
 	nodes = getNodes(graph)
 
-	while true:
+	while True:
 
 		currentNode, currentDistance = PriorityQueue.pop(0)		#get node from PQ
 		visited.add(currentNode)								#add node to visited
@@ -62,7 +78,7 @@ def dijkstra(source, dest, graph, algorithm):
 		# will look into that later as well ...
 		
 		# look at neighbours and consider weights
-		for edge in currentNode.getEdges:
+		for edge in getEdges(currentNode, graph):
 			for node in edge: neighbours.add(node)
 
 		for neighbour in neighbours:
@@ -78,7 +94,7 @@ def dijkstra(source, dest, graph, algorithm):
 
 		#reshuffle PQ (sort by distance)
 		print str(PriorityQueue)    #before
-
+		PriorityQueue.sort(distance_compare)
 		print str(PriorityQueue)    #after
 
 
@@ -91,9 +107,10 @@ def dijkstra(source, dest, graph, algorithm):
 
 	res = []
 	node = dest
-	while (node != source):
+	while True:
 		res = [node] + res
-		node = path[node]
+		if node in path: node = path[node]
+		else : break
 
 	return res
 
@@ -168,7 +185,9 @@ work.close()
 
 
 print time.time()-startOfProgram
-print getNodes(Graph)
+print "Testing out Dijkstra with A and D"
+pathz = dijkstra('A', 'D', Graph, algorithm)
+print str(pathz)
 
 
 
