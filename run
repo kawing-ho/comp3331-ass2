@@ -15,8 +15,14 @@ echo -n "Packet Rate (packets/second) : "
 read RATE
 if [ $RATE -le 0 ]; then echo "Only positive integers allowed !"; exit ; fi
 
-TOP="sampletop.txt"
-WORK="samplework.txt"
+if [ $# -gt 0 ]
+then 
+	TOP="sampletop.txt"
+	WORK="samplework.txt"
+else
+	TOP="topology.txt"
+	WORK="workload.txt"
+fi
 
 echo "Using files '$TOP' and '$WORK' ..."
 

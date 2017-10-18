@@ -57,6 +57,7 @@ def LeastLoad():
 # input : Source, Dest, Graph, algo
 # output: Path as a list from Src -> Dest
 def dijkstra(source, dest, graph, algorithm):
+	if(source not in getNodes(graph) or dest not in getNodes(graph)): return None
 	path = {}						#Path is dict going backwards eg. path[B] = A
 	PriorityQueue = [(source,0)];   #PQ stores tuple of (node,distanceFromSource)
 	visited = set()
@@ -197,6 +198,14 @@ print "=== Testing out Dijkstra D and C ==="
 print str(dijkstra('D', 'C', Graph, algorithm))
 print "=== Testing out Dijkstra D and A ==="
 print str(dijkstra('D', 'A', Graph, algorithm))
+
+print " *** Topology.txt ***"
+print "=== Testing out Dijkstra G and I ==="
+print str(dijkstra('G', 'I', Graph, algorithm))
+print "=== Testing out Dijkstra I and G ==="
+print str(dijkstra('I', 'G', Graph, algorithm))
+print "=== Testing out Dijkstra D and O ==="
+print str(dijkstra('D', 'O', Graph, algorithm))
 
 '''
 Similarities and Differences of Virtual Circuit / Virtual Packet
