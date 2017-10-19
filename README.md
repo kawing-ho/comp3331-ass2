@@ -6,18 +6,19 @@ Seems like my concept of capacity was wrong (This is what a tutor said):
 - packets are sent one at a time and everytime before sending we check the availability of the link
 - When a packet is sent the capacity goes down by 1 and after 0.5 second it goes back up by 1
 - If a packet tries to get sent while theres no more capacity then it's counted as BLOCKED
--
 - In circuit a blocked packet would never occur midway as the whole connection would have been blocked since the beginning
 
 
 
+### Pseudocode for packet handling:
+
+```python
 request = work.readline()              <-- start off by reading the very first line
 readyForNextLine = FALSE               <-- boolean flag which sees if the next line is ready to be read
 timeOfNextRequest = getTime(request)
 
-===============================
-Pseudocode for packet handling:
-===============================
+
+
 
 start = time.time()
 while True:                             <---- no time restriction on this outer loop, whereas time restrictions happen INSIDE
@@ -99,5 +100,4 @@ while True:                             <---- no time restriction on this outer 
 	  inconsistensies / race conditions :(  , unless I put the code for releasing outside the for loop ?
 
 	  -> will think more about it tomorrow ...
-
-
+```
