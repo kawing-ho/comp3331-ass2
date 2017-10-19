@@ -10,7 +10,7 @@ References :
 '''
 
 import sys, re
-import time, math, threading
+import time, math, threading, json
 
 #returns the correct order of edge eg. "AB" -> "AB" , "BA" -> "AB"
 def reorder(one,two): return (one + two) if (ord(one) < ord(two)) else (two + one);
@@ -56,17 +56,50 @@ def LeastLoad():
 
 def SDPTest(graph):
 	print "Testing SDP"
+	print "graph is <",graph,">"
+	print json.dumps(graph, indent=4)
+	print "========A to D=============="
+	print str(dijkstraSDP('A', 'D', Graph, algorithm))
+	print "========A to F=============="
 	exit(1)
 
+def sortDelay(graph, edges):
+	print "SORTING EDGES"
+	newEdges = {}
+	print edges
+	delaytime = getDelayTime(graph)
+	print delaytime
+	for value in delaytime:
+		edge,delay = value
+		print edge
+		if(edge in edges):
+			newEdges[edge] = delay
+	#print newEdges
+	return newEdges
+	#newEdges.append(edges[0])
+	#for edge in edges:
+	#	if edge in newEdges: continue
+	#return edge
+
+def getDelayTime(graph):
+	if graph == None: return None
+	delaytime = {}
+	for edge in graph:
+		delaytime[edge] = graph[edge]['delay']
+	print delaytime
+	delaytime = sorted(delaytime.iteritems(), key=lambda (k,v): (v,k))
+	return delaytime
 # input : Source, Dest, Graph, algo
 # output: Path as a list from Src -> Dest but using the shortest delay time
 def dijkstraSDP(source, dest, graph, algorithm):
 	if(source not in getNodes(graph) or dest not in getNodes(graph)): return None
 	path = {}						#Path is dict going backwards eg. path[B] = A
 	PriorityQueue = [(source,0)];   #PQ stores tuple of (node,distanceFromSource)
+	delay = {}
 	visited = set()
 	neighbours = set()
 	nodes = getNodes(graph)
+	delay[source] = 0
 
 	while True:
 		(currentNode, currentDistance) = PriorityQueue.pop(0) #Take of first element
@@ -74,22 +107,26 @@ def dijkstraSDP(source, dest, graph, algorithm):
 		if(currentNode == dest):							# Check if node is destination
 			print("Found destination !")
 			break
-
-		for edge in getEdges(currentNode, graph):
+		edges = getEdges(currentNode, graph)
+		edges = sortDelay(graph, edges)
+		for edge in edges:
 			for node in edge:
 				neighbours.add(node)
 
-		for neighbours in neighbours:
+		for neighbour in neighbours:
 			if neighbour in visited:
 				continue
 			else:
 				visited.add(neighbour)
 			currentEdge = reorder(neighbour,currentNode)
 			weight = 1
-			print "Adding " + neighbour + " " + str(currentDistance + weight) + " to PQ "
+			print "Adding " + neighbour + " " + str(currentDistance + weight) + " to PriorityQueue "
 			PriorityQueue.append((neighbour,currentDistance + weight))
 			path[neighbour] = currentNode
-
+			tempdelay= graph[currentEdge]["delay"]
+			delay[neighbour] = delay[currentNode] + int(tempdelay)
+		print "path is |",path
+		print "delay is |",delay
 		print str(PriorityQueue)    #before
 		PriorityQueue.sort(distance_compare)
 		print str(PriorityQueue)    #after
@@ -102,7 +139,7 @@ def dijkstraSDP(source, dest, graph, algorithm):
 			else : break
 
 		print res
-	return
+	return res
 
 
 # input : Source, Dest, Graph, algo
