@@ -72,6 +72,10 @@ def SDPTest(graph):
 	print str(dijkstraSDP('A', 'A', Graph, algorithm))
 	exit(1)
 
+def getDelayOfEdge(graph,edge):
+	delaytime = int(graph[edge]['delay'])
+	return delaytime
+
 #input: edges
 #output: sorts edges according to delay time
 def sortDelay(graph, edges):
@@ -105,30 +109,41 @@ def dijkstraSDP(source, dest, graph, algorithm):
 	delay = {}
 	visited = set()
 	neighbours = set()
+	other = list()
 	nodes = getNodes(graph)
 #	for i in nodes:
 #		delay[i] = 0
 	delay[source] = 0
 
 	while True:
+		other = []
+		print "priorty queue is ",PriorityQueue
 		(currentNode, currentDistance) = PriorityQueue.pop(0) #Take of first element
+		print "current node is",currentNode
 		visited.add(currentNode)
+		print "visited",visited
 		if(currentNode == dest):							# Check if node is destination
 			print("Found destination !")
 			break
 		edges = getEdges(currentNode, graph)
 		edges = sortDelay(graph, edges)
+		#print "edges is |", edges
 		for edge,time in sorted(edges.iteritems(), key=lambda (k,v): (v,k)):
+			#print "edge is",edge
 			for node in edge:
+				#print "node is", node
 				neighbours.add(node)
-		print "edges is |", edges
+				if(node not in other): other.append(node)
 		print "neighbours is |", neighbours
-		for neighbour in neighbours:
+		print "other is |", other
+		for neighbour in other:
+			if neighbour == currentNode: continue
+			currentEdge = reorder(neighbour,currentNode)
 			if (neighbour in visited):
-				continue
+				if(getDelayOfEdge(graph,currentEdge) + delay[currentNode] > delay[neighbour]):
+					continue
 			else:
 				visited.add(neighbour)
-			currentEdge = reorder(neighbour,currentNode)
 			weight = 1
 			print "Adding " + neighbour + " " + str(currentDistance + weight) + " to PriorityQueue "
 			PriorityQueue.append((neighbour,currentDistance + weight))
