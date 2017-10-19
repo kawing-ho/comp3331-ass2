@@ -4,7 +4,7 @@
 #z5113471 Andy Yang
 
 '''
-References : 
+References :
 (1)> List-sorting with tuples in them: https://stackoverflow.com/a/36075587
 (2)> ...
 '''
@@ -23,7 +23,7 @@ def getNeighbours(node,g):
 	return None
 
 #return list of nodes in the graph
-def getNodes(g): 
+def getNodes(g):
 	nodes = set()
 	for edge in g.keys():
 		[nodes.add(node) for node in edge]
@@ -36,7 +36,7 @@ def distance_compare(a, b):
 	elif a[1] == b[1]:
 		if a[0] > b[0]: return 1
 		else: return -1
-	else: return 1                
+	else: return 1
 #-----------------------------------
 
 #SHP algorithm
@@ -53,6 +53,53 @@ def ShortestDelay():
 #Weight = Load of that edge (very volatile as it can change in the middle of a connection)
 def LeastLoad():
 	print("Least Load Path !")
+
+# input : Source, Dest, Graph, algo
+# output: Path as a list from Src -> Dest but using the shortest delay time
+def dijkstraSDP(source, dest, graph, algorithm):
+	if(source not in getNodes(graph) or dest not in getNodes(graph)): return None
+	path = {}						#Path is dict going backwards eg. path[B] = A
+	PriorityQueue = [(source,0)];   #PQ stores tuple of (node,distanceFromSource)
+	visited = set()
+	neighbours = set()
+	nodes = getNodes(graph)
+
+	while True:
+		(currentNode, currentDistance) = PriorityQueue.pop(0) #Take of first element
+		visited.add(currentNode)
+		if(currentNode == dest):							# Check if node is destination
+			print("Found destination !")
+			break
+
+		for edge in getEdges(currentNode, graph):
+			for node in edge:
+				neighbours.add(node)
+
+		for neighbours in neighbours:
+			if neighbour in visited:
+				continue
+			else:
+				visited.add(neighbour)
+			currentEdge = reorder(neighbour,currentNode)
+			weight = 1
+			print "Adding " + neighbour + " " + str(currentDistance + weight) + " to PQ "
+			PriorityQueue.append((neighbour,currentDistance + weight))
+			path[neighbour] = currentNode
+
+		print str(PriorityQueue)    #before
+		PriorityQueue.sort(distance_compare)
+		print str(PriorityQueue)    #after
+
+		res = []
+		node = dest
+		while True:
+			res = [node] + res
+			if node in path: node = path[node]
+			else : break
+
+		print res
+	return
+
 
 # input : Source, Dest, Graph, algo
 # output: Path as a list from Src -> Dest
@@ -78,19 +125,19 @@ def dijkstra(source, dest, graph, algorithm):
 
 		# I don't know how to do the triangulation thing where if A->C = 7 but A->B->C = 5 then change 7 to 5
 		# will look into that later as well ...
-		
+
 		# look at neighbours and consider weights
 		for edge in getEdges(currentNode, graph):
 			for node in edge: neighbours.add(node)
 
 		for neighbour in neighbours:
 			if neighbour in visited: continue					#if neighbour in visited skip
-			else: visited.add(neighbour) 
+			else: visited.add(neighbour)
 			currentEdge = reorder(neighbour,currentNode)
 			weight = 1 											#in the case of SHP weight = 1 for each edge
 			print "Adding " + neighbour + " " + str(currentDistance + weight) + " to PQ "
 			PriorityQueue.append((neighbour,currentDistance + weight))
-		
+
 
 			#default behaviour: path[neighbour] = currentNode
 			path[neighbour] = currentNode
@@ -213,10 +260,10 @@ Seems like my concept of capacity was wrong (This is what a tutor said):
 - If the link was completely empty then you could send 20 packets through it where each packet would take 0.5s (if PacketRate was 2)
 - However if there were other connections going through it like maybe 6 then you would only have 14
 - packets are sent one at a time and everytime before sending we check the availability of the link
-- When a packet is sent the capacity goes down by 1 and after 0.5 second it goes back up by 1 
+- When a packet is sent the capacity goes down by 1 and after 0.5 second it goes back up by 1
 - If a packet tries to get sent while theres no more capacity then it's counted as BLOCKED
-- 
-- In circuit a blocked packet would never occur midway as the whole connection would have been blocked since the beginning 
+-
+- In circuit a blocked packet would never occur midway as the whole connection would have been blocked since the beginning
 '''
 
 '''
@@ -241,7 +288,7 @@ while True:                             <---- no time restriction on this outer 
 			timeOfNextRequest = getTime(request)  <---- update the time of the next request so it knows when to start the next connection
 
 
-	#Processing new request  <-- this part runs when the timeOfNextRequest >= currentTime 
+	#Processing new request  <-- this part runs when the timeOfNextRequest >= currentTime
 								 (however this will produce inaccurate timing , need to refine somehow)
 
 	if(timeOfNextRequest >= currentTime):
@@ -259,14 +306,14 @@ while True:                             <---- no time restriction on this outer 
 
 
 		#note that each new request has to go through this step so techincally you wouldn't have any cases
-		#where a block would happen midway for any two requests 
+		#where a block would happen midway for any two requests
 
 		if(capacity of shortestPath can accomodate the request):
-			
-			add to list/queue/whatever of existing requests as standard procedure
-		
 
-		else: block all packets for this request 
+			add to list/queue/whatever of existing requests as standard procedure
+
+
+		else: block all packets for this request
 
 
 
@@ -300,9 +347,9 @@ while True:                             <---- no time restriction on this outer 
 
 	> need to maintain tiny bit of state across time frames
 	-> eg. at time 0.5 connection A uses up capacity (1) , at time 1.0 A releases (1) capacity but also decides to use capacity (1) again for another packet cycle
-	-> at time 1.5 connection A has reached its duration then it releases capacity (1) and doesn't reuse again 
-	-> at time 0.5 other connections will know that connection A is using (1) capacity, and also at time 1.0, finally at time 1.5 the other connections will 
-	   know that connection A has released its (1) capacity, 
+	-> at time 1.5 connection A has reached its duration then it releases capacity (1) and doesn't reuse again
+	-> at time 0.5 other connections will know that connection A is using (1) capacity, and also at time 1.0, finally at time 1.5 the other connections will
+	   know that connection A has released its (1) capacity,
 
 	->but the problem is that the code to release A at time 1.5 is in the same time frame as the other connections checking for open connections, this would cause
 	  inconsistensies / race conditions :(  , unless I put the code for releasing outside the for loop ?
