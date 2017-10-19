@@ -1,19 +1,30 @@
 #!/bin/bash
 #Simple shell script to help us test the program faster ! 
 
-echo -n "Network Scheme ([C]ircuit/[P]acket) : "
-read SCHEME; SCHEME=`echo $SCHEME | tr '[:lower:]' '[:upper:]'`
-if [ $SCHEME != "P" -a $SCHEME != "C" ]
-then echo "Wrong input !"; exit ; fi
 
-echo -n "Routing Scheme (SHP/SDP/LLP) : "
+#not using since we only work with Circuit now
+
+#echo -n "Network Scheme ([C]ircuit/[P]acket) : "                
+#read SCHEME; SCHEME=`echo $SCHEME | tr '[:lower:]' '[:upper:]'`
+#if [ $SCHEME != "P" -a $SCHEME != "C" ]
+#then echo "Wrong input !"; exit ; fi
+
+echo -n "Routing Scheme (SHP [H] /SDP [D] /LLP [L]) : "
 read ROUTE; ROUTE=`echo $ROUTE | tr '[:lower:]' '[:upper:]'`
-if [ $ROUTE != "SHP" -a $ROUTE != "SDP" -a $ROUTE != "LLP" ]
-then echo "Wrong input !"; exit ; fi
+
+
+case $ROUTE in
+"H") ROUTE="SHP";;
+"D") ROUTE="SDP";;
+"L") ROUTE="LLP";;
+*)   ROUTE="SHP";;
+esac
 
 echo -n "Packet Rate (packets/second) : "
 read RATE
+if [ -z $RATE ]; then RATE=2; fi
 if [ $RATE -le 0 ]; then echo "Only positive integers allowed !"; exit ; fi
+
 
 if [ $# -gt 0 ]
 then 
@@ -26,10 +37,11 @@ fi
 
 echo "Using files '$TOP' and '$WORK' ..."
 
-if [ $SCHEME == "P" ]; then SCHEME="PACKET"; fi
-if [ $SCHEME == "C" ]; then SCHEME="CIRCUIT"; fi
-echo -e "Running python RoutingPerformance.py $SCHEME $ROUTE $TOP $WORK $RATE\n"
+#if [ $SCHEME == "P" ]; then SCHEME="PACKET"; fi
+#if [ $SCHEME == "C" ]; then SCHEME="CIRCUIT"; fi
+
+echo -e "Running python RoutingPerformance.py CIRCUIT $ROUTE $TOP $WORK $RATE\n"
 sleep 1
 
-python RoutingPerformance.py $SCHEME $ROUTE $TOP $WORK $RATE
+python RoutingPerformance.py CIRCUIT $ROUTE $TOP $WORK $RATE
 

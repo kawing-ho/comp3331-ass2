@@ -11,18 +11,23 @@ References :
 
 import sys, re
 import time, math, threading, json
+from collections import defaultdict
 
 #returns the correct order of edge eg. "AB" -> "AB" , "BA" -> "AB"
-def reorder(one,two): return (one + two) if (ord(one) < ord(two)) else (two + one);
+def reorder(one,two): return (one + two) if (ord(one) < ord(two)) else (two + one)
 
 #return list of edges that involve that node
 def getEdges(node,g): return [edge for edge in g if node in edge]
 
-#return neighbours of a node
-def getNeighbours(node,g):
-	return None
+#return neighbours of a node (not including itself)
+def getNeighbours(myNode,g):
+	neighbours = set()
+	for edge in getEdges(myNode,g):
+		[neighbours.add(node) for node in edge if (node != myNode)]
+	return sorted(list(neighbours))
 
 #return list of nodes in the graph
+# I wanna shorten this later lol
 def getNodes(g):
 	nodes = set()
 	for edge in g.keys():
@@ -39,38 +44,95 @@ def distance_compare(a, b):
 	else: return 1
 #-----------------------------------
 
-#SHP algorithm
-#All weights = 1 since only hops counted (same for all edges)
-def ShortestHop():
-	print("Shortest Hop Path !")
+#SHP algorithm 
+#Weight = 1 (same across all edges)
+#input : Source, Dest, Graph
+#output: Path as a list from Src -> Dest
+def ShortestHop(source, dest, graph):
+	path = {}						#Path is dict going backwards eg. path[B] = A
+	PriorityQueue = [(source,0)];   #PQ stores tuple of (node,distanceFromSource)
+	visited = set()
+	neighbours = set()
+	nodes = getNodes(graph)
+
+	while True:
+
+		currentNode, currentDistance = PriorityQueue.pop(0)		#get node from PQ
+		visited.add(currentNode)								#add node to visited
+
+		if(currentNode == dest): break							#break if goal found
+
+		# look at neighbours and consider weights
+		for neighbour in getNeighbours(currentNode,graph):
+			if neighbour in visited: continue					#skip if seen neighbour before
+			else: visited.add(neighbour)
+
+			currentEdge = reorder(neighbour,currentNode)
+			PriorityQueue.append((neighbour,currentDistance + 1)) #weight = 1 for all edges in SHP
+
+			path[neighbour] = currentNode
+
+		#reshuffle PQ (sort by distance)
+		PriorityQueue.sort(distance_compare)
+
+	res = []
+	node = dest
+	while True:
+		res = [node] + res
+		if node in path: node = path[node]
+		else : break
+
+	return res
 
 #SDP algorithm
 #Weight = delay of that edge (constant but different for every edge)
 def ShortestDelay():
-	print("Shortest Delay Path !")
+	return None
 
 #LLP algorithm
 #Weight = Load of that edge (very volatile as it can change in the middle of a connection)
 def LeastLoad():
-	print("Least Load Path !")
+	return None
+
+def SHPTest(graph):
+	print "=== Testing out SHP with A and D ==="
+	print str(ShortestHop('A', 'D', graph))
+
+	print "=== Testing out SHP A and B ==="
+	print str(ShortestHop('A', 'B', graph))
+	print "=== Testing out SHP D and C ==="
+	print str(ShortestHop('D', 'C', graph))
+	print "=== Testing out SHP D and A ==="
+	print str(ShortestHop('D', 'A', graph))
+
+	if('G' not in getNodes(graph)): return
+	print " *** Topology.txt ***"
+	print "=== Testing out SHP G and I ==="
+	print str(ShortestHop('G', 'I', graph))
+	print "=== Testing out SHP I and G ==="
+	print str(ShortestHop('I', 'G', graph))
+	print "=== Testing out SHP D and O ==="
+	print str(ShortestHop('D', 'O', graph))
+	print "=== Testing out SHP M and E ==="
+	print str(ShortestHop('M', 'E', graph))
+
 
 def SDPTest(graph):
 	print "Testing SDP"
 	print "graph is <",graph,">"
 	print json.dumps(graph, indent=4)
 	print "\n========A to D=============="
-	print str(dijkstraSDP('A', 'D', Graph, algorithm))
+	print str(dijkstraSDP('A', 'D', graph))
 	print "\n========A to F=============="
-	print str(dijkstraSDP('A', 'F', Graph, algorithm))
+	print str(dijkstraSDP('A', 'F', graph))
 	print "\n========A to E=============="
-	print str(dijkstraSDP('A', 'E', Graph, algorithm))
+	print str(dijkstraSDP('A', 'E', graph))
 	print "\n========F to C=============="
-	print str(dijkstraSDP('F', 'C', Graph, algorithm))
+	print str(dijkstraSDP('F', 'C', graph))
 	print "\n========E to C=============="
-	print str(dijkstraSDP('E', 'C', Graph, algorithm))
+	print str(dijkstraSDP('E', 'C', graph))
 	print "\n========A to A=============="
-	print str(dijkstraSDP('A', 'A', Graph, algorithm))
-	exit(1)
+	print str(dijkstraSDP('A', 'A', graph))
 
 #input: edges
 #output: sorts edges according to delay time
@@ -95,10 +157,10 @@ def getDelayTime(graph):
 	delaytime = sorted(delaytime.iteritems(), key=lambda (k,v): (v,k))
 	return delaytime
 
-
-# input : Source, Dest, Graph, algo
-# output: Path as a list from Src -> Dest but using the shortest delay time
-def dijkstraSDP(source, dest, graph, algorithm):
+#Prototype for SDP
+#input : Source, Dest, Graph
+#output: Path as a list from Src -> Dest but using the shortest delay time
+def dijkstraSDP(source, dest, graph):
 	if(source not in getNodes(graph) or dest not in getNodes(graph)): return None
 	path = {}						#Path is dict going backwards eg. path[B] = A
 	PriorityQueue = [(source,0)];   #PQ stores tuple of (node,distanceFromSource)
@@ -113,9 +175,9 @@ def dijkstraSDP(source, dest, graph, algorithm):
 	while True:
 		(currentNode, currentDistance) = PriorityQueue.pop(0) #Take of first element
 		visited.add(currentNode)
-		if(currentNode == dest):							# Check if node is destination
-			print("Found destination !")
-			break
+
+		if(currentNode == dest): break			# Check if node is destination
+			
 		edges = getEdges(currentNode, graph)
 		edges = sortDelay(graph, edges)
 		for edge,time in sorted(edges.iteritems(), key=lambda (k,v): (v,k)):
@@ -137,8 +199,7 @@ def dijkstraSDP(source, dest, graph, algorithm):
 			delay[neighbour] = delay[currentNode] + int(tempdelay)
 		print "path is |",path
 		print "delay is |",delay
-		print str(PriorityQueue)    #before
-		print str(PriorityQueue)    #after
+		print str(PriorityQueue)
 
 	res = []
 	node = dest
@@ -148,75 +209,6 @@ def dijkstraSDP(source, dest, graph, algorithm):
 		else : break
 
 	return res
-
-
-# input : Source, Dest, Graph, algo
-# output: Path as a list from Src -> Dest
-def dijkstra(source, dest, graph, algorithm):
-	if(source not in getNodes(graph) or dest not in getNodes(graph)): return None
-	path = {}						#Path is dict going backwards eg. path[B] = A
-	PriorityQueue = [(source,0)];   #PQ stores tuple of (node,distanceFromSource)
-	visited = set()
-	neighbours = set()
-	nodes = getNodes(graph)
-
-	while True:
-
-		currentNode, currentDistance = PriorityQueue.pop(0)		#get node from PQ
-		#print "Just popped off " + currentNode + " " + str(currentDistance)
-		visited.add(currentNode)								#add node to visited
-
-		#if node is GOAL, fill out path and break
-		if(currentNode == dest):
-			print("Found destination !")
-			break
-
-
-		# I don't know how to do the triangulation thing where if A->C = 7 but A->B->C = 5 then change 7 to 5
-		# will look into that later as well ...
-
-		# look at neighbours and consider weights
-		for edge in getEdges(currentNode, graph):
-			for node in edge: neighbours.add(node)
-
-		for neighbour in neighbours:
-			if neighbour in visited: continue					#if neighbour in visited skip
-			else: visited.add(neighbour)
-			currentEdge = reorder(neighbour,currentNode)
-			weight = 1 											#in the case of SHP weight = 1 for each edge
-			print "Adding " + neighbour + " " + str(currentDistance + weight) + " to PQ "
-			PriorityQueue.append((neighbour,currentDistance + weight))
-
-
-			#default behaviour: path[neighbour] = currentNode
-			path[neighbour] = currentNode
-			#advanced behaviour: triangulation will alter the path to something else if needed
-
-		#reshuffle PQ (sort by distance)
-		print str(PriorityQueue)    #before
-		PriorityQueue.sort(distance_compare)
-		print str(PriorityQueue)    #after
-
-
-	#deconstruct / reconstruct path :
-	# eg. path[dest] = mid, path[mid] = source,
-	# res = []
-	# res = dest + []
-	# res = mid + dest + []
-	# res = source + mid + dest
-
-	res = []
-	node = dest
-	while True:
-		res = [node] + res
-		if node in path: node = path[node]
-		else : break
-
-	return res
-
-
-
-
 
 
 #Just some simple error-checking in args
@@ -231,7 +223,7 @@ try:
 	work = open(sys.argv[4])
 except Exception as e: print str(e); exit()
 
-Graph = {} #Graph is a dict containing dicts
+Graph = {} 						   #Graph is a dict containing dicts
 scheme = sys.argv[1]
 algorithm = sys.argv[2]
 rate = int(sys.argv[5])            # eg. if rate = 2 it means 2 packets/s
@@ -249,20 +241,15 @@ for line in top.readlines():
 
     Graph[edge] = {"delay":propDelay, "max":maxCapacity, "load":0}
 
-    print str(edge) + " -> " + str(Graph[edge])  #EXAMPLE , DELETE LATER
-
 #Finish graph initialization
 top.close()
 
-
+print json.dumps(Graph, indent=4)
 print "It takes ",time.time()-startOfProgram,"to finish initialization"
-print "\nCan we find C ?"             # ------------------------
-myList = getEdges("C",Graph.keys())   #  EXAMPLE , DELETE LATER
-print myList				          # ------------------------
 
 startTime = time.time()
 #Parse workload file
-for line in work.readlines():
+for count,line in enumerate(work.readlines()):
     match = re.search("([\d\.]+) ([A-Z]) ([A-Z]) ([\d\.]+)",line)
     if(match is None): continue
 
@@ -270,39 +257,29 @@ for line in work.readlines():
     targetEdge = reorder(match.group(2), match.group(3))
     duration = match.group(4)
 
-    #the type of network scheme defines the behaviour of the algorithms ?  (not sure yet tbh)
-    print "Current time is", time.time() - startTime
+    print "Line " + str(count) + " / Current time is", time.time() - startTime
+
     #Choose which routing algorithm to run
     if(algorithm == "SHP"):
-        ShortestHop()
+    	#SHPTest(Graph)
+        #ShortestHop()
+        continue
     elif(algorithm == "SDP"):
-        ShortestDelay()
+    	#SDPTest(Graph)
+        #ShortestDelay()
+        continue
     else:
         LeastLoad()
 
-
+#Finish parsing workload file
 work.close()
 
+#Testing area
+if(algorithm == "SHP"): SHPTest(Graph)
+elif(algorithm == "SDP"): SDPTest(Graph)
+print "End of Prog --> " + str(time.time()-startOfProgram)
 
-if algorithm == "SDP": SDPTest(Graph)
-print time.time()-startOfProgram
-print "=== Testing out Dijkstra with A and D ==="
-print str(dijkstra('A', 'D', Graph, algorithm))
 
-print "=== Testing out Dijkstra A and B ==="
-print str(dijkstra('A', 'B', Graph, algorithm))
-print "=== Testing out Dijkstra D and C ==="
-print str(dijkstra('D', 'C', Graph, algorithm))
-print "=== Testing out Dijkstra D and A ==="
-print str(dijkstra('D', 'A', Graph, algorithm))
-
-print " *** Topology.txt ***"
-print "=== Testing out Dijkstra G and I ==="
-print str(dijkstra('G', 'I', Graph, algorithm))
-print "=== Testing out Dijkstra I and G ==="
-print str(dijkstra('I', 'G', Graph, algorithm))
-print "=== Testing out Dijkstra D and O ==="
-print str(dijkstra('D', 'O', Graph, algorithm))
 
 '''
 Seems like my concept of capacity was wrong (This is what a tutor said):
