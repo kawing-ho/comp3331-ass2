@@ -54,6 +54,10 @@ def ShortestDelay():
 def LeastLoad():
 	print("Least Load Path !")
 
+def SDPTest(graph):
+	print "Testing SDP"
+	exit(1)
+
 # input : Source, Dest, Graph, algo
 # output: Path as a list from Src -> Dest but using the shortest delay time
 def dijkstraSDP(source, dest, graph, algorithm):
@@ -235,6 +239,7 @@ for line in work.readlines():
 work.close()
 
 
+if algorithm == "SDP": SDPTest(Graph)
 print time.time()-startOfProgram
 print "=== Testing out Dijkstra with A and D ==="
 print str(dijkstra('A', 'D', Graph, algorithm))
