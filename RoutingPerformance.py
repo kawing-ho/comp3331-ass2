@@ -58,37 +58,36 @@ def SDPTest(graph):
 	print "Testing SDP"
 	print "graph is <",graph,">"
 	print json.dumps(graph, indent=4)
-	print "========A to D=============="
+	print "\n========A to D=============="
 	print str(dijkstraSDP('A', 'D', Graph, algorithm))
-	print "========A to F=============="
+	print "\n========A to F=============="
+	print str(dijkstraSDP('A', 'F', Graph, algorithm))
 	exit(1)
 
+#input: edges
+#output: sorts edges according to delay time
 def sortDelay(graph, edges):
-	print "SORTING EDGES"
 	newEdges = {}
-	print edges
 	delaytime = getDelayTime(graph)
-	print delaytime
 	for value in delaytime:
 		edge,delay = value
-		print edge
 		if(edge in edges):
 			newEdges[edge] = delay
-	#print newEdges
+	#LOL THIS ISNT THE WAY I WANT TO DO THIS
+	#newEdges = sorted(newEdges.iteritems(), key=lambda (k,v): (v,k))
 	return newEdges
-	#newEdges.append(edges[0])
-	#for edge in edges:
-	#	if edge in newEdges: continue
-	#return edge
 
+#returns an dictionary of delay from the graph sorted in accenditing
+#order from lower delay time to highest delay time
 def getDelayTime(graph):
 	if graph == None: return None
 	delaytime = {}
 	for edge in graph:
-		delaytime[edge] = graph[edge]['delay']
-	print delaytime
+		delaytime[edge] = int(graph[edge]['delay'])
 	delaytime = sorted(delaytime.iteritems(), key=lambda (k,v): (v,k))
 	return delaytime
+
+
 # input : Source, Dest, Graph, algo
 # output: Path as a list from Src -> Dest but using the shortest delay time
 def dijkstraSDP(source, dest, graph, algorithm):
@@ -109,10 +108,11 @@ def dijkstraSDP(source, dest, graph, algorithm):
 			break
 		edges = getEdges(currentNode, graph)
 		edges = sortDelay(graph, edges)
-		for edge in edges:
+		for edge,time in sorted(edges.iteritems(), key=lambda (k,v): (v,k)):
 			for node in edge:
 				neighbours.add(node)
-
+		print "edges is |", edges
+		print "neighbours is |", neighbours
 		for neighbour in neighbours:
 			if neighbour in visited:
 				continue
@@ -135,9 +135,11 @@ def dijkstraSDP(source, dest, graph, algorithm):
 		node = dest
 		while True:
 			res = [node] + res
-			if node in path: node = path[node]
-			else : break
-
+			if node in path:
+				node = path[node]
+			else:
+				break
+		print "----"
 		print res
 	return res
 
