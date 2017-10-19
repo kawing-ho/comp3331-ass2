@@ -62,6 +62,14 @@ def SDPTest(graph):
 	print str(dijkstraSDP('A', 'D', Graph, algorithm))
 	print "\n========A to F=============="
 	print str(dijkstraSDP('A', 'F', Graph, algorithm))
+	print "\n========A to E=============="
+	print str(dijkstraSDP('A', 'E', Graph, algorithm))
+	print "\n========F to C=============="
+	print str(dijkstraSDP('F', 'C', Graph, algorithm))
+	print "\n========E to C=============="
+	print str(dijkstraSDP('E', 'C', Graph, algorithm))
+	print "\n========A to A=============="
+	print str(dijkstraSDP('A', 'A', Graph, algorithm))
 	exit(1)
 
 #input: edges
@@ -98,6 +106,8 @@ def dijkstraSDP(source, dest, graph, algorithm):
 	visited = set()
 	neighbours = set()
 	nodes = getNodes(graph)
+#	for i in nodes:
+#		delay[i] = 0
 	delay[source] = 0
 
 	while True:
@@ -114,7 +124,7 @@ def dijkstraSDP(source, dest, graph, algorithm):
 		print "edges is |", edges
 		print "neighbours is |", neighbours
 		for neighbour in neighbours:
-			if neighbour in visited:
+			if (neighbour in visited):
 				continue
 			else:
 				visited.add(neighbour)
@@ -128,19 +138,15 @@ def dijkstraSDP(source, dest, graph, algorithm):
 		print "path is |",path
 		print "delay is |",delay
 		print str(PriorityQueue)    #before
-		PriorityQueue.sort(distance_compare)
 		print str(PriorityQueue)    #after
 
-		res = []
-		node = dest
-		while True:
-			res = [node] + res
-			if node in path:
-				node = path[node]
-			else:
-				break
-		print "----"
-		print res
+	res = []
+	node = dest
+	while True:
+		res = [node] + res
+		if node in path: node = path[node]
+		else : break
+
 	return res
 
 
