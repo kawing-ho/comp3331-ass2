@@ -133,6 +133,10 @@ def SDPTest(graph):
 	print str(dijkstraSDP('E', 'C', graph))
 	print "\n========A to A=============="
 	print str(dijkstraSDP('A', 'A', graph))
+	print "\n========F to O=============="
+	print str(dijkstraSDP('F', 'O', graph))
+	print "\n========K to L=============="
+	print str(dijkstraSDP('K', 'L', graph))
 
 def getDelayOfEdge(graph,edge):
 	delaytime = int(graph[edge]['delay'])
