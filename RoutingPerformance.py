@@ -44,7 +44,7 @@ def distance_compare(a, b):
 	else: return 1
 #-----------------------------------
 
-#SHP algorithm 
+#SHP algorithm
 #Weight = 1 (same across all edges)
 #input : Source, Dest, Graph
 #output: Path as a list from Src -> Dest
