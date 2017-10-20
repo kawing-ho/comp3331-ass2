@@ -140,6 +140,8 @@ def SDPTest():
 	print str(dijkstraSDP('A', 'A', Graph))
 	print "\n========F to O=============="
 	print str(dijkstraSDP('F', 'O', Graph))
+	print "\n========K to L=============="
+	print str(dijkstraSDP('K', 'L', Graph))
 
 def getDelayOfEdge(graph,edge): return int(graph[edge]['delay'])
 
