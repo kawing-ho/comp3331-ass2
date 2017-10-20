@@ -268,7 +268,7 @@ for count,line in enumerate(work.readlines()):
     #targetEdge = reorder(match.group(2), match.group(3))
     duration = match.group(4)
 
-    print "Line",str(count),"/ Current time is", time.time() - startTime
+    #print "Line",str(count),"/ Current time is", time.time() - startTime
 
     #Choose which routing algorithm to run
     if(algorithm == "SHP"):
