@@ -185,9 +185,10 @@ def dijkstraSDP(source, dest, graph):
 
 			currentEdge = reorder(currentNode,neighbour)
 			currentDelay = getDelayOfEdge(currentEdge)
-			print currentDelay
+			print  "Considering",currentEdge,"->",currentDelay,"from",currentNode
 
 			PriorityQueue.append((neighbour,delayToCurrentNode + currentDelay))
+			print PriorityQueue
 
 			path[neighbour] = currentNode
 
