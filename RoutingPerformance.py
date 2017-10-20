@@ -149,16 +149,15 @@ def sortDelay(graph, edges):
 	for edge,delay in delaytime:
 		if(edge in edges):
 			newEdges[edge] = delay
-	#LOL THIS ISNT THE WAY I WANT TO DO THIS
-	#newEdges = sorted(newEdges.iteritems(), key=lambda (k,v): (v,k)
+
 	return newEdges
 
 #returns a dictionary of delay from the graph sorted
-#from lowest delay time to highest delay time
+#from lowest delay time to highest delay time   eg.  {"AB":5 ,"BD":10, "CB":30}
 def getDelayTime(graph):
 	delaytime = {}
 	for edge in graph:
-		delaytime[edge] = int(graph[edge]['delay'])
+		delaytime[edge] = getDelayOfEdge(graph,edge)
 	delaytime = sorted(delaytime.iteritems(), key=lambda (k,v): (v,k))
 	return delaytime
 
@@ -169,51 +168,43 @@ def dijkstraSDP(source, dest, graph):
 	if(source not in getNodes(graph) or dest not in getNodes(graph)): return None
 	path = {}						#Path is dict going backwards eg. path[B] = A
 	delay = {}
-	PriorityQueue = [source];
+	queue = [source];
 	visited = set()
-	neighbours = set()
 
 	delay[source] = 0
 
 	while True:
-		other = []
-		print "priorty queue is ",PriorityQueue
-		currentNode = PriorityQueue.pop(0) #Take of first element
-		print "current node is",currentNode
+	#while queue:
+		currentNode = queue.pop(0)
+		print "--- current node is ",currentNode,"---"
 		visited.add(currentNode)
 
-		print "visited",visited
-		if(currentNode == dest):							# Check if node is destination
-			print("Found destination !")
-			break
-		edges = getEdges(currentNode, graph)
-		edges = sortDelay(graph, edges)
-		#print "edges is |", edges
-		for edge,time in sorted(edges.iteritems(), key=lambda (k,v): (v,k)):
-			#print "edge is",edge
-			for node in edge:
-				#print "node is", node
-				neighbours.add(node)
-				if(node not in other): other.append(node)
-		print "neighbours is |", neighbours
-		print "other is |", other
-		for neighbour in other:
-			if neighbour == currentNode: continue
+		print "visited  |\t",list(visited)
+		if(currentNode == dest): 				# Check if node is destination
+			sys.stdout.write("Found destination ! Path is ")
+			break				
+
+
+		#edges = getEdges(currentNode, graph)
+		#edges = sortDelay(graph, edges)
+
+		for neighbour in getNeighbours(currentNode,graph):
+
 			currentEdge = reorder(neighbour,currentNode)
+
 			if (neighbour in visited):
 				if(getDelayOfEdge(graph,currentEdge) + delay[currentNode] > delay[neighbour]):
 					continue
 			else:
 				visited.add(neighbour)
-			weight = 1
-			print "Adding " + neighbour  + " to PriorityQueue "
-			PriorityQueue.append(neighbour)
+
+			queue.append(neighbour)
 			path[neighbour] = currentNode
-			tempdelay= graph[currentEdge]["delay"]
-			delay[neighbour] = delay[currentNode] + int(tempdelay)
-		print "path is |",path
-		print "delay is |",delay
-		print str(PriorityQueue)
+			delay[neighbour] = delay[currentNode] + getDelayOfEdge(graph,currentEdge)
+
+		print "path is  |\t",path
+		print "delay is |\t",delay
+		print "queue is |\t",str(queue)
 
 	res = []
 	node = dest

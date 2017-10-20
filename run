@@ -1,10 +1,10 @@
 #!/bin/bash
-#Simple shell script to help us test the program faster ! 
+#Simple shell script to help us test the program faster !
 
 
 #not using since we only work with Circuit now
 
-#echo -n "Network Scheme ([C]ircuit/[P]acket) : "                
+#echo -n "Network Scheme ([C]ircuit/[P]acket) : "
 #read SCHEME; SCHEME=`echo $SCHEME | tr '[:lower:]' '[:upper:]'`
 #if [ $SCHEME != "P" -a $SCHEME != "C" ]
 #then echo "Wrong input !"; exit ; fi
@@ -17,7 +17,7 @@ case $ROUTE in
 "H") ROUTE="SHP";;
 "D") ROUTE="SDP";;
 "L") ROUTE="LLP";;
-*)   ROUTE="SHP";;
+*)   ROUTE="SDP";;  #<--- edit this to select what default behaviour is run
 esac
 
 echo -n "Packet Rate (packets/second) : "
