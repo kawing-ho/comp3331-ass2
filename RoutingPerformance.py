@@ -123,20 +123,18 @@ def SDPTest(graph):
 	print json.dumps(graph, indent=4)
 	print "\n========A to D=============="
 	print str(dijkstraSDP('A', 'D', graph))
-	print "\n========A to F=============="
-	print str(dijkstraSDP('A', 'F', graph))
 	print "\n========A to E=============="
 	print str(dijkstraSDP('A', 'E', graph))
 	print "\n========F to C=============="
 	print str(dijkstraSDP('F', 'C', graph))
 	print "\n========E to C=============="
 	print str(dijkstraSDP('E', 'C', graph))
-	print "\n========A to A=============="
-	print str(dijkstraSDP('A', 'A', graph))
 	print "\n========F to O=============="
 	print str(dijkstraSDP('F', 'O', graph))
 	print "\n========K to L=============="
 	print str(dijkstraSDP('K', 'L', graph))
+	print "\n========I to G=============="
+	print str(dijkstraSDP('I', 'G', graph))
 
 def getDelayOfEdge(graph,edge):
 	delaytime = int(graph[edge]['delay'])
