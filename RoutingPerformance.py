@@ -143,7 +143,7 @@ def SDPTest():
 	print "\n========K to L=============="
 	print str(dijkstraSDP('K', 'L', Graph))
 
-def getDelayOfEdge(edge): return int(graph[edge]['delay'])
+def getDelayOfEdge(edge): return int(Graph[edge]['delay'])
 
 #input: edges
 #output: sorts edges according to delay time
@@ -187,7 +187,7 @@ def dijkstraSDP(source, dest, graph):
 			currentDelay = getDelayOfEdge(currentEdge)
 			print currentDelay
 
-			PriorityQueue.append((neighbour,currentDistance + 1))
+			PriorityQueue.append((neighbour,delayToCurrentNode + currentDelay))
 
 			path[neighbour] = currentNode
 
