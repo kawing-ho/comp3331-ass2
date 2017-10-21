@@ -89,42 +89,99 @@ def shortestHop(source, dest, graph):
 
 	return res
 
-#SDP algorithm
-#Weight = delay of that edge (constant but different for every edge)
-def shortestDelay():
-	return None
 
-#LLP algorithm
-#Weight = Load of that edge (very volatile as it can change in the middle of a connection)
-def leastLoad():
-	return None
+#Main algorithm for computing routes (depending on algorithm)
+#input : Source, Dest, Graph, algorithm
+#output: Path as a list from Src -> Dest
+def dijkstra(source, dest, graph):
+	path = {}								#Path is dict going backwards eg. path[B] = A
+	PriorityQueue = [(source,0)];			#PQ stores tuple of (node,totalWeightFromSource)
+	visited = set()
+
+	while PriorityQueue:
+
+		#Get node + weight so far from top of PQ
+		currentNode, weightToCurrentNode = PriorityQueue.pop(0)
+
+		#Get neighbours of this node, also compute the proper weightages
+		for neighbour in getNeighbours(currentNode,graph):
+			if neighbour in visited: continue		#prevent looping / backtracking
+
+			currentEdge = reorder(currentNode,neighbour)
+
+			#choose weight of edge depending on what algo is running
+			if  (algorithm == "SDP"): currentWeight = getDelayOfEdge(currentEdge)
+			elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)
+			else               : currentWeight = 1  #for SHP
+
+			#print neighbour,":Considering",currentEdge,"->",currentWeight,"from",currentNode,"with",weightToCurrentNode
+
+			comparativeWeight = currentWeight + weightToCurrentNode  	#value to compare with one on the queue
+			originalWeight = dict(PriorityQueue).get(neighbour, None)  	#value found on the queue (if any)
+
+			#if that node is already in the PriorityQueue do triangulation
+			if(originalWeight is not None):
+
+				#don't have to change anything if the originalWeight is less 
+				if(comparativeWeight < originalWeight):
+
+					#Change the originalWeight in PQ to the comparativeWeight
+					PriorityQueue.remove((neighbour,originalWeight))		#tuples can't be edited
+					PriorityQueue.append((neighbour,comparativeWeight))		#so have to remove and re-add again
+
+					#Change path to pass through current node instead
+					path[neighbour] = currentNode
+
+			else:
+				PriorityQueue.append((neighbour,weightToCurrentNode + currentWeight))
+				path[neighbour] = currentNode
+
+		PriorityQueue.sort(tuple_compare)			#reshuffle the PQ (sort by propDelay)
+		visited.add(currentNode)					#add currentNode to finished list
+
+	#reconstruct the path into a list
+	res = []
+	node = dest
+	while True:
+		res = [node] + res
+		if node in path: node = path[node]
+		else : break
+
+	return res
+
 
 def SHPTest():
 	print "=== Testing out SHP with A and D ==="
-	print str(shortestHop('A', 'D', Graph))
+	#print str(shortestHop('A', 'D', Graph))
+	print str(dijkstra('A', 'D', Graph))
 	print "=== Testing out SHP A and B ==="
-	print str(shortestHop('A', 'B', Graph))
+	#print str(shortestHop('A', 'B', Graph))
+	print str(dijkstra('A', 'B', Graph))
 	print "=== Testing out SHP D and C ==="
-	print str(shortestHop('D', 'C', Graph))
+	#print str(shortestHop('D', 'C', Graph))
+	print str(dijkstra('D', 'C', Graph))
 	print "=== Testing out SHP D and A ==="
-	print str(shortestHop('D', 'A', Graph))
+	#print str(shortestHop('D', 'A', Graph))
+	print str(dijkstra('D', 'A', Graph))
 
 
 	if('G' not in getNodes(Graph)): return
 	print " *** Topology.txt ***"
 	print "=== Testing out SHP G and I ==="
-	print str(shortestHop('G', 'I', Graph))
+	#print str(shortestHop('G', 'I', Graph))
+	print str(dijkstra('G', 'I', Graph))
 	print "=== Testing out SHP I and G ==="
-	print str(shortestHop('I', 'G', Graph))
+	#print str(shortestHop('I', 'G', Graph))
+	print str(dijkstra('I', 'G', Graph))
 	print "=== Testing out SHP D and O ==="
-	print str(shortestHop('D', 'O', Graph))
+	#print str(shortestHop('D', 'O', Graph))
+	print str(dijkstra('D', 'O', Graph))
 	print "=== Testing out SHP M and E ==="
-	print str(shortestHop('M', 'E', Graph))
-
+	#print str(shortestHop('M', 'E', Graph))
+	print str(dijkstra('M', 'E', Graph))
 
 def SDPTest():
-	print "Testing SDP"
-	print json.dumps(Graph, indent=4)
+	print "************Testing SDP******************"
 	print "\n========A to D=============="
 	print str(dijkstraSDP('A', 'D', Graph))
 	print "\n========A to F=============="
@@ -148,10 +205,39 @@ def SDPTest():
 	print "\n========E to I=============="
 	print str(dijkstraSDP('E', 'I', Graph))
 
+	print "***************Testing dijkstra**************"
+	print "\n========A to D=============="
+	print str(dijkstra('A', 'D', Graph))
+	print "\n========A to F=============="
+	print str(dijkstra('A', 'F', Graph))
+	print "\n========A to E=============="
+	print str(dijkstra('A', 'E', Graph))
+	print "\n========F to C=============="
+	print str(dijkstra('F', 'C', Graph))
+	print "\n========E to C=============="
+	print str(dijkstra('E', 'C', Graph))
+	print "\n========A to A=============="
+	print str(dijkstra('A', 'A', Graph))
+	print "\n========F to O=============="
+	print str(dijkstra('F', 'O', Graph))
+	print "\n========K to L=============="
+	print str(dijkstra('K', 'L', Graph))
+	print "\n========I to G=============="
+	print str(dijkstra('I', 'G', Graph))
+	print "\n========M to A=============="
+	print str(dijkstra('M', 'A', Graph))
+	print "\n========E to I=============="
+	print str(dijkstra('E', 'I', Graph))
+
+def LLPTest():
+	return None
+
 
 def getDelayOfEdge(edge): return int(Graph[edge]['delay'])
-
 def getLoadOfEdge(edge): return int(Graph[edge]['load'])
+
+def increaseLoad(edge): Graph[edge]["load"]+= 1
+def decreaseLoad(edge):	Graph[edge]["load"]-= 1
 
 #input: edges
 #output: sorts edges according to delay time
@@ -177,7 +263,6 @@ def getDelayTime(graph):
 #input : Source, Dest, Graph
 #output: Path as a list from Src -> Dest but using the shortest delay time
 def dijkstraSDP(source, dest, graph):
-	if(source not in getNodes(graph) or dest not in getNodes(graph)): return None
 	path = {}								#Path is dict going backwards eg. path[B] = A
 	PriorityQueue = [(source,0)];			#PQ stores tuple of (node,totalDelayFromSource)
 	visited = set()
@@ -253,13 +338,13 @@ startOfProgram = time.time()
 
 #Graph initialization
 for line in top.readlines():
-    match = re.search("([A-Z]) ([A-Z]) (\d+) (\d+)",line)
+ 	match = re.search("([A-Z]) ([A-Z]) (\d+) (\d+)",line)
 
-    edge = reorder(match.group(1), match.group(2))
-    propDelay = match.group(3)
-    maxCapacity = match.group(4)
+	edge = reorder(match.group(1), match.group(2))
+	propDelay = match.group(3)
+	maxCapacity = match.group(4)
 
-    Graph[edge] = {"delay":propDelay, "max":maxCapacity, "load":0}
+	Graph[edge] = {"delay":propDelay, "max":maxCapacity, "load":0}
 
 #Finish graph initialization
 top.close()
@@ -270,44 +355,46 @@ print "It takes",time.time()-startOfProgram,"to finish initialization"
 startTime = time.time()
 #Parse workload file
 for count,line in enumerate(work.readlines()):
-    match = re.search("([\d\.]+) ([A-Z]) ([A-Z]) ([\d\.]+)",line)
-    if(match is None): continue
+	match = re.search("([\d\.]+) ([A-Z]) ([A-Z]) ([\d\.]+)",line)
+	if(match is None): continue
 
-    fileTime = match.group(1)
-    source = match.group(2)
-    dest = match.group(3)
-    #targetEdge = reorder(match.group(2), match.group(3))
-    duration = match.group(4)
+	fileTime = match.group(1)
+	source = match.group(2)
+	dest = match.group(3)
+	duration = match.group(4)
 
-    print "Line",str(count),"/ Current time is", time.time() - startTime
+	#print "Line",str(count),"/ Current time is", time.time() - startTime
 
-    #Choose which routing algorithm to run
-    if(algorithm == "SHP"):
+	#==============================================
+	continue    #leave this uncommented for testing
+	#==============================================
 
-    	#----------------------------------------------
-        continue    #leave this uncommented for testing
-        #----------------------------------------------
+	#grab a saved path or run the algorithm if not found
+	path = checkSaved(reorder(source,dest))
+	if(path is None):
+		path = dijkstra(source, dest, Graph)	#algorithm is global so no need to pass in
+		routes[reorder(source,dest)] = path
+	else:
+		print "Used a saved path !"
 
-        #grab path from saved values or run algorithm if not found
-        path = checkSaved(reorder(source,dest))
-        if(path is None):
-        	path = shortestHop(source, dest, Graph)
-        	routes[reorder(source,dest)] = path
-        	print "Ran algo !"
-        else:
-        	print "Found a saved path!",reorder(source,dest)
+	#convert nodes across path into edges
+	# update = []
+	# for index, node in enumerate(path):
+	# 	if(node == path[-1]): continue 	#skip last element
+	# 	update.append(reorder(node,path[index+1]))
 
-
-    elif(algorithm == "SDP"):
-        #ShortestDelay()
-        continue
-    else:
-        LeastLoad()
+	# #do the actual updating to the graph
+	# [increaseLoad(edge) for edge in update]
 
 #Finish parsing workload file
 work.close()
 
+
+
+
+
 #Testing area
 if(algorithm == "SHP"): SHPTest()
 elif(algorithm == "SDP"): SDPTest()
+else: LLPTest()
 print "End of Prog -->",str(time.time()-startOfProgram)
