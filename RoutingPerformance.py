@@ -137,7 +137,7 @@ def dijkstra(source, dest, graph):
 				PriorityQueue.append((neighbour,weightToCurrentNode + currentWeight))
 				path[neighbour] = currentNode
 
-		PriorityQueue.sort(tuple_compare)			#reshuffle the PQ (sort by propDelay)
+		PriorityQueue.sort(tuple_compare)			#reshuffle the PQ (sort by weight)
 		visited.add(currentNode)					#add currentNode to finished list
 
 	#reconstruct the path into a list
