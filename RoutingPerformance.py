@@ -124,7 +124,6 @@ def SHPTest():
 
 def SDPTest():
 	print "Testing SDP"
-	print "graph is <",Graph,">"
 	print json.dumps(Graph, indent=4)
 	print "\n========A to D=============="
 	print str(dijkstraSDP('A', 'D', Graph))
@@ -142,8 +141,17 @@ def SDPTest():
 	print str(dijkstraSDP('F', 'O', Graph))
 	print "\n========K to L=============="
 	print str(dijkstraSDP('K', 'L', Graph))
+	print "\n========I to G=============="
+	print str(dijkstraSDP('I', 'G', Graph))
+	print "\n========M to A=============="
+	print str(dijkstraSDP('M', 'A', Graph))
+	print "\n========E to I=============="
+	print str(dijkstraSDP('E', 'I', Graph))
+
 
 def getDelayOfEdge(edge): return int(Graph[edge]['delay'])
+
+def getLoadOfEdge(edge): return int(Graph[edge]['load'])
 
 #input: edges
 #output: sorts edges according to delay time
@@ -177,7 +185,7 @@ def dijkstraSDP(source, dest, graph):
 	while PriorityQueue:
 
 		#Get node + delay so far from top of PQ
-		currentNode, delayToCurrentNode = PriorityQueue.pop(0)	
+		currentNode, delayToCurrentNode = PriorityQueue.pop(0)
 
 		#Get neighbours of this node, also compute the proper weightages
 		for neighbour in getNeighbours(currentNode,graph):
@@ -185,15 +193,30 @@ def dijkstraSDP(source, dest, graph):
 
 			currentEdge = reorder(currentNode,neighbour)
 			currentDelay = getDelayOfEdge(currentEdge)
-			print  "Considering",currentEdge,"->",currentDelay,"from",currentNode
 
-			PriorityQueue.append((neighbour,delayToCurrentNode + currentDelay))
-			print PriorityQueue
+			#print neighbour,":Considering",currentEdge,"->",currentDelay,"from",currentNode,"with",delayToCurrentNode
 
-			path[neighbour] = currentNode
+			comparativeDelay = currentDelay + delayToCurrentNode  		#value to compare with one on the queue
+			originalDelay = dict(PriorityQueue).get(neighbour, None)  	#value found on the queue (if any)
 
-		#reshuffle the PQ (sort by propDelay)
-		PriorityQueue.sort(tuple_compare)
+			#if that node is already in the PriorityQueue do triangulation
+			if(originalDelay is not None):
+
+				#don't have to change anything if the originalDelay is less 
+				if(comparativeDelay < originalDelay):
+
+					#Change the originalDelay in PQ to the comparativeDelay
+					PriorityQueue.remove((neighbour,originalDelay))			#tuples can't be edited
+					PriorityQueue.append((neighbour,comparativeDelay))		#so have to remove and re-add again
+
+					#Change path to pass through current node instead
+					path[neighbour] = currentNode
+
+			else:
+				PriorityQueue.append((neighbour,delayToCurrentNode + currentDelay))
+				path[neighbour] = currentNode
+
+		PriorityQueue.sort(tuple_compare)			#reshuffle the PQ (sort by propDelay)
 		visited.add(currentNode)					#add currentNode to finished list
 
 	#reconstruct the path into a list
