@@ -35,7 +35,7 @@ def getNodes(g):
 
 #comparator function for sorting PQ
 #-------(See reference (1))--------
-def distance_compare(a, b):
+def tuple_compare(a, b):
 	if a[1] < b[1]: return -1
 	elif a[1] == b[1]:
 		if a[0] > b[0]: return 1
@@ -78,7 +78,7 @@ def shortestHop(source, dest, graph):
 			path[neighbour] = currentNode
 
 		#reshuffle PQ (sort by distance)
-		PriorityQueue.sort(distance_compare)
+		PriorityQueue.sort(tuple_compare)
 
 	res = []
 	node = dest
@@ -125,7 +125,6 @@ def SHPTest():
 
 def SDPTest():
 	print "Testing SDP"
-	print "graph is <",Graph,">"
 	print json.dumps(Graph, indent=4)
 	print "\n========A to D=============="
 	print str(dijkstraSDP('A', 'D', Graph))
@@ -141,8 +140,15 @@ def SDPTest():
 	print str(dijkstraSDP('K', 'L', Graph))
 	print "\n========I to G=============="
 	print str(dijkstraSDP('I', 'G', Graph))
+	print "\n========M to A=============="
+	print str(dijkstraSDP('M', 'A', Graph))
+	print "\n========E to I=============="
+	print str(dijkstraSDP('E', 'I', Graph))
 
-def getDelayOfEdge(graph,edge): return int(graph[edge]['delay'])
+
+def getDelayOfEdge(edge): return int(Graph[edge]['delay'])
+
+def getLoadOfEdge(edge): return int(Graph[edge]['load'])
 
 #input: edges
 #output: sorts edges according to delay time
@@ -169,46 +175,48 @@ def getDelayTime(graph):
 #output: Path as a list from Src -> Dest but using the shortest delay time
 def dijkstraSDP(source, dest, graph):
 	if(source not in getNodes(graph) or dest not in getNodes(graph)): return None
-	path = {}						#Path is dict going backwards eg. path[B] = A
-	delay = {}
-	queue = [source];
+	path = {}								#Path is dict going backwards eg. path[B] = A
+	PriorityQueue = [(source,0)];			#PQ stores tuple of (node,totalDelayFromSource)
 	visited = set()
 
-	delay[source] = 0
+	while PriorityQueue:
 
-	while True:
-	#while queue:
-		currentNode = queue.pop(0)
-		print "--- current node is ",currentNode,"---"
-		visited.add(currentNode)
+		#Get node + delay so far from top of PQ
+		currentNode, delayToCurrentNode = PriorityQueue.pop(0)
 
-		print "visited  |\t",list(visited)
-		if(currentNode == dest): 				# Check if node is destination
-			sys.stdout.write("Found destination ! Path is ")
-			break
-
-
-		#edges = getEdges(currentNode, graph)
-		#edges = sortDelay(graph, edges)
-
+		#Get neighbours of this node, also compute the proper weightages
 		for neighbour in getNeighbours(currentNode,graph):
+			if neighbour in visited: continue		#prevent looping / backtracking
 
-			currentEdge = reorder(neighbour,currentNode)
+			currentEdge = reorder(currentNode,neighbour)
+			currentDelay = getDelayOfEdge(currentEdge)
 
-			if (neighbour in visited):
-				if(getDelayOfEdge(graph,currentEdge) + delay[currentNode] > delay[neighbour]):
-					continue
+			#print neighbour,":Considering",currentEdge,"->",currentDelay,"from",currentNode,"with",delayToCurrentNode
+
+			comparativeDelay = currentDelay + delayToCurrentNode  		#value to compare with one on the queue
+			originalDelay = dict(PriorityQueue).get(neighbour, None)  	#value found on the queue (if any)
+
+			#if that node is already in the PriorityQueue do triangulation
+			if(originalDelay is not None):
+
+				#don't have to change anything if the originalDelay is less 
+				if(comparativeDelay < originalDelay):
+
+					#Change the originalDelay in PQ to the comparativeDelay
+					PriorityQueue.remove((neighbour,originalDelay))			#tuples can't be edited
+					PriorityQueue.append((neighbour,comparativeDelay))		#so have to remove and re-add again
+
+					#Change path to pass through current node instead
+					path[neighbour] = currentNode
+
 			else:
-				visited.add(neighbour)
+				PriorityQueue.append((neighbour,delayToCurrentNode + currentDelay))
+				path[neighbour] = currentNode
 
-			queue.append(neighbour)
-			path[neighbour] = currentNode
-			delay[neighbour] = delay[currentNode] + getDelayOfEdge(graph,currentEdge)
+		PriorityQueue.sort(tuple_compare)			#reshuffle the PQ (sort by propDelay)
+		visited.add(currentNode)					#add currentNode to finished list
 
-		print "path is  |\t",path
-		print "delay is |\t",delay
-		print "queue is |\t",str(queue)
-
+	#reconstruct the path into a list
 	res = []
 	node = dest
 	while True:
