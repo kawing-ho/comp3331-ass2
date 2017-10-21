@@ -332,6 +332,8 @@ rate = int(sys.argv[5])            # eg. if rate = 2 it means 2 packets/s
 packetTime = float(1.0 / rate)	   # that means each packet takes 0.5 s to transmit
 startOfProgram = time.time()
 
+OPEN  = 1  						   #define these values for job events
+CLOSE = 0
 
 #Graph initialization
 for line in top.readlines():
@@ -355,30 +357,43 @@ elif(algorithm == "SDP"): SDPTest()
 else: LLPTest()
 print "End of Prog -->",str(time.time()-startOfProgram)
 
-exit() 
-
 #-------------------------------------------------
 # ----------------WORK IN PROGRESS----------------
 #-------------------------------------------------
 
+jobQueue = []				#a queue which shows what should happen and when
+activeConnections = {}
+
+#Job structure: [TIME_OF_EVENT, SOURCE, DEST, TYPE]
 
 startTime = 0.000000
 #Parse workload file into a job queue
-for count,line in enumerate(work.readlines()):
+for line in work.readlines():
 	match = re.search("([\d\.]+) ([A-Z]) ([A-Z]) ([\d\.]+)",line)
 	if(match is None): continue
 
-	fileTime = match.group(1)
+	fileTime = float(match.group(1))
 	source = match.group(2)
 	dest = match.group(3)
-	duration = match.group(4)
+	duration = float(match.group(4))
+
+	jobQueue.append([fileTime, source, dest, OPEN])
+	jobQueue.append([round(fileTime+duration,6), source, dest, CLOSE])
 
 #Finish parsing workload file
 work.close()
 
+#sort the job queue chronologically by time
+jobQueue.sort() #I checked the output and this sorts properly :)
 
-while jobQueue and activeConnections:
+while jobQueue:
+	#print startTime
+	if startTime > (jobQueue[0][0]-0.000001):  #for some reason '==' causes infinite loop ...
+		event = jobQueue.pop(0)
+		status = 'OPEN' if event[3] == 1 else 'CLOSE'
+		print "@",event[0],"connection between",reorder(event[1],event[2]),status
 
+	startTime += 0.000001
 
 #end of everything
 
