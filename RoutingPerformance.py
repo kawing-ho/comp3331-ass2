@@ -349,8 +349,21 @@ top.close()
 print json.dumps(Graph, indent=4)
 print "It takes",time.time()-startOfProgram,"to finish initialization"
 
-startTime = time.time()
-#Parse workload file
+#Testing area
+if(algorithm == "SHP"): SHPTest()
+elif(algorithm == "SDP"): SDPTest()
+else: LLPTest()
+print "End of Prog -->",str(time.time()-startOfProgram)
+
+exit() 
+
+#-------------------------------------------------
+# ----------------WORK IN PROGRESS----------------
+#-------------------------------------------------
+
+
+startTime = 0.000000
+#Parse workload file into a job queue
 for count,line in enumerate(work.readlines()):
 	match = re.search("([\d\.]+) ([A-Z]) ([A-Z]) ([\d\.]+)",line)
 	if(match is None): continue
@@ -360,6 +373,23 @@ for count,line in enumerate(work.readlines()):
 	dest = match.group(3)
 	duration = match.group(4)
 
+#Finish parsing workload file
+work.close()
+
+
+while jobQueue and activeConnections:
+
+
+#end of everything
+
+#Print summary and statistics
+print "Number of successfully routed packets: "
+print "Number of blocked packets"
+print "Average number of successfully routed packets"
+print "Overall time: "
+print ""
+
+'''
 	#print "Line",str(count),"/ Current time is", time.time() - startTime
 
 	#==============================================
@@ -382,16 +412,4 @@ for count,line in enumerate(work.readlines()):
 
 	# #do the actual updating to the graph
 	# [increaseLoad(edge) for edge in update]
-
-#Finish parsing workload file
-work.close()
-
-
-
-
-
-#Testing area
-if(algorithm == "SHP"): SHPTest()
-elif(algorithm == "SDP"): SDPTest()
-else: LLPTest()
-print "End of Prog -->",str(time.time()-startOfProgram)
+'''
