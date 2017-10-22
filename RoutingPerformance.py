@@ -9,9 +9,7 @@ References :
 (2)> ...
 '''
 
-import sys, re
-import time, math, threading, json
-from collections import defaultdict
+import sys, re, time, math, json
 
 #returns the correct order of edge eg. "AB" -> "AB" , "BA" -> "AB"
 def reorder(one,two): return (one + two) if (ord(one) < ord(two)) else (two + one)
@@ -50,6 +48,30 @@ def tuple_compare(a, b):
 def checkSaved(route):
 	if(algorithm == "LLP") or (route not in routes.keys()): return None
 	else: return routes[route]
+
+#converts a path of nodes into a path of edges
+#eg. ['A','B',C'] => ['AB', 'BC']
+def convertPath(path):
+	new = []
+	for index, node in enumerate(path):
+ 		if(node == path[-1]): continue 	#skip last element
+ 		new.append(reorder(node,path[index+1]))
+	return new
+
+#function which checks a path on a graph whether its full or not
+#input: a list of edges (eg. ["AB","BC","CD"])
+#output: 1 if its fully occupied, 0 otherwise
+def fullCapacity(path):
+	for edge in path:
+		if(getLoadOfEdge(edge) == getCapacityOfEdge(edge)):
+			return 1
+	else: return 0
+
+#function which updates the graphs by adding the value to the specidied edges
+#input: a list of edge to update and the value to update them with
+def updateGraph(path, value):
+	for edge in path:
+		Graph[edge]['load'] += value
 
 
 #SHP algorithm
@@ -232,29 +254,7 @@ def LLPTest():
 
 def getDelayOfEdge(edge): return int(Graph[edge]['delay'])
 def getLoadOfEdge(edge): return int(Graph[edge]['load'])
-
-def increaseLoad(edge): Graph[edge]["load"]+= 1
-def decreaseLoad(edge):	Graph[edge]["load"]-= 1
-
-#input: edges
-#output: sorts edges according to delay time
-def sortDelay(graph, edges):
-	newEdges = {}
-	delaytime = getDelayTime(graph)
-	for edge,delay in delaytime:
-		if(edge in edges):
-			newEdges[edge] = delay
-
-	return newEdges
-
-#returns a dictionary of delay from the graph sorted
-#from lowest delay time to highest delay time   eg.  {"AB":5 ,"BD":10, "CB":30}
-def getDelayTime(graph):
-	delaytime = {}
-	for edge in graph:
-		delaytime[edge] = getDelayOfEdge(graph,edge)
-	delaytime = sorted(delaytime.iteritems(), key=lambda (k,v): (v,k))
-	return delaytime
+def getCapacityOfEdge(edge): return int(Graph[edge]['max'])
 
 #Prototype for SDP
 #input : Source, Dest, Graph
@@ -330,10 +330,14 @@ scheme = sys.argv[1]
 algorithm = sys.argv[2]
 rate = int(sys.argv[5])            # eg. if rate = 2 it means 2 packets/s
 packetTime = float(1.0 / rate)	   # that means each packet takes 0.5 s to transmit
-startOfProgram = time.time()
 
-OPEN  = 1  						   #define these values for job events
+#defined values for job events
+OPEN  = 1
 CLOSE = 0
+
+#variables for printing statistics at the end
+blockedPackets = 0
+successfulPackets = 0
 
 #Graph initialization
 for line in top.readlines():
@@ -348,27 +352,25 @@ for line in top.readlines():
 #Finish graph initialization
 top.close()
 
-print json.dumps(Graph, indent=4)
-print "It takes",time.time()-startOfProgram,"to finish initialization"
+#print json.dumps(Graph, indent=4)
 
 #Testing area
 if(algorithm == "SHP"): SHPTest()
 elif(algorithm == "SDP"): SDPTest()
 else: LLPTest()
-print "End of Prog -->",str(time.time()-startOfProgram)
 
 #-------------------------------------------------
 # ----------------WORK IN PROGRESS----------------
 #-------------------------------------------------
 
-jobQueue = []				#a queue which shows what should happen and when
-activeConnections = {}
+jobQueue = []				#queue of open and close events for connections
+activeRequests = set()
 
-#Job structure: [TIME_OF_EVENT, SOURCE, DEST, TYPE]
+#Job structure: [TIME_OF_EVENT, SOURCE, DEST, DURATION, TYPE]
 
 startTime = 0.000000
 #Parse workload file into a job queue
-for count,line in enumerate(work.readlines()):
+for requestCount,line in enumerate(work.readlines()):
 	match = re.search("([\d\.]+) ([A-Z]) ([A-Z]) ([\d\.]+)",line)
 	if(match is None): continue
 
@@ -377,80 +379,86 @@ for count,line in enumerate(work.readlines()):
 	dest = match.group(3)
 	duration = float(match.group(4))
 
-	jobQueue.append([fileTime, source, dest, OPEN])						#start of a connection
-	jobQueue.append([round(fileTime+duration,6), source, dest, CLOSE])	#end of a connection
-	circuitRequests = count
-
-print "Count of circuitRequests is",circuitRequests
+	jobQueue.append([fileTime, source, dest, duration, OPEN])						#start of a connection
+	jobQueue.append([round(fileTime+duration,6), source, dest, duration, CLOSE])	#end of a connection
 
 #Finish parsing workload file
 work.close()
 
 #sort the job queue chronologically by time
-jobQueue.sort() #I checked the output and this sorts properly :)
+jobQueue.sort()
 
-while jobQueue and activeConnections:
+#numberOfPackets = floor(duration / timePerPacket)
+
+#This loop ends when the very last connection is closed
+#which is simulated by the last element being popped from the queue
+while jobQueue:
 
 	#Get events from the jobQueue when the time comes
 	if jobQueue and startTime > (jobQueue[0][0]-0.000001):
 		event = jobQueue.pop(0)
-		status = 'OPEN' if event[3] == 1 else 'CLOSE'
-		print "@",event[0],"connection between",reorder(event[1],event[2]),status
 
-		#if type == open
-			#run algorithm
-			#increase load across the path by some amount
-			#add to active connections
+
+		source = event[1]
+		dest = event[2]
+		duration = event[3]
+		type = event[4]
+		circuitPath = reorder(event[1],event[2])
+
+		status = 'OPEN' if type == 1 else 'CLOSE'
+		print "@",event[0],"connection between",circuitPath,status
+
+		#<Request for connection>
+		# - run algorithm
+		# - check if capacity is enough
+		# - (increase load and count packets) OR (block packets)
+		if(type == OPEN):
+
+			#check if there is any pre-existing path
+			path = checkSaved(circuitPath)
+
+			#run algorithm if there's none
+			if(path is None):
+				path = dijkstra(source, dest, Graph)
+				routes[circuitPath] = path
+
+			#count the packets to send/block
+			numberOfPackets = math.floor( duration / packetTime)
 
 			#if path is occupied then block everything
+			if(fullCapacity(convertPath(path))):
+				#add statistics
+				blockedPackets += numberOfPackets
 
-		#if type == close
-			#check if its in the active connections
-			#if its not then skip
+			else:
+				#add statistics
+				successfulPackets += numberOfPackets
+				activeRequests.add(circuitPath)
 
-			#if it is then 
-				#remove from there
-				#do statistics 
-				#decrease load by a certain amount
+				#increase load across the path
+				updateGraph(convertPath(path),1)
 
+			
+		#<Close the connection>
+		# - If the request to open was not blocked decrease the load
+		elif(type == CLOSE and circuitPath in activeRequests):
+			#remove from activeRequests
+			activeRequests.remove(circuitPath)
 
-
-	#Handle all of the currently active connections
-
+			#decrease load across the path
+			updateGraph(convertPath(path),-1)
 
 	startTime += 0.000001
 
 #end of everything
+totalPackets = successfulPackets + blockedPackets
 
 #Print summary and statistics
-print "Total number of virtual circuit requests"
-print "Number of successfully routed packets: "
-print "Number of blocked packets"
-print "Average number of successfully routed packets"
-print "Overall time: "
-print ""
-
-'''
-	#print "Line",str(count),"/ Current time is", time.time() - startTime
-
-	#==============================================
-	continue    #leave this uncommented for testing
-	#==============================================
-
-	#grab a saved path or run the algorithm if not found
-	path = checkSaved(reorder(source,dest))
-	if(path is None):
-		path = dijkstra(source, dest, Graph)	#algorithm is global so no need to pass in
-		routes[reorder(source,dest)] = path
-	else:
-		print "Used a saved path !"
-
-	#convert nodes across path into edges
-	# update = []
-	# for index, node in enumerate(path):
-	# 	if(node == path[-1]): continue 	#skip last element
-	# 	update.append(reorder(node,path[index+1]))
-
-	# #do the actual updating to the graph
-	# [increaseLoad(edge) for edge in update]
-'''
+print "Total number of virtual circuit requests:",(requestCount+1)
+print "Total number of packets:",totalPackets
+print "Number of successfully routed packets:",successfulPackets
+print "Percentage of succesfully routed packets:",((float(successfulPackets)/totalPackets)*100),"%"
+print "Number of blocked packets:",blockedPackets
+print "Percentage of blocked packets:",((float(blockedPackets)/totalPackets)*100),"%"
+print "Average number of hops per circuit:"
+print "Average cumulative propagation delay per circuit:"
