@@ -368,7 +368,7 @@ else: LLPTest()
 #-------------------------------------------------
 
 jobQueue = []				#queue of open and close events for connections
-activeRequests = set()
+activeRequests = []
 totalHops = 0
 totalDelay = 0
 successfulCircuits = 0
@@ -435,12 +435,13 @@ while jobQueue:
 			if(fullCapacity(path)):
 				#add statistics
 
-				print str(path),"is blocked"
-				print json.dumps(Graph,indent=4)
+				#print str(path),"is blocked"
+				#print sorted(activeRequests)
+				#print json.dumps(Graph,indent=4)
 
 				blockedPackets += numberOfPackets
 
-				raw_input()
+				#raw_input()
 
 			else:
 
@@ -448,7 +449,7 @@ while jobQueue:
 				updateGraph(path,1)
 
 				#add to set for connection closing
-				activeRequests.add(circuitPath)
+				activeRequests.append(circuitPath)
 
 				#add statistics
 				successfulPackets += numberOfPackets
@@ -468,8 +469,9 @@ while jobQueue:
 				#decrease load across the path
 				updateGraph(path,-1)
 			else:
-				print circuitPath,"was blocked so no need to close : ",str(routes[circuitPath])
-				raw_input()
+				#print circuitPath,"was blocked so no need to close : ",str(routes[circuitPath])
+				#print sorted(activeRequests)
+				#raw_input()
 
 	startTime += 0.000001
 
