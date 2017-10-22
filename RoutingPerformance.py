@@ -113,7 +113,7 @@ def dijkstra(source, dest, graph):
 			#choose weight of edge depending on what algo is running
 			if  (algorithm == "SDP"): currentWeight = getDelayOfEdge(currentEdge)
 			elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)
-			else               : currentWeight = 1  #for SHP
+			else           		    : currentWeight = 1  #for SHP
 
 			#print neighbour,":Considering",currentEdge,"->",currentWeight,"from",currentNode,"with",weightToCurrentNode
 
@@ -368,7 +368,7 @@ activeConnections = {}
 
 startTime = 0.000000
 #Parse workload file into a job queue
-for line in work.readlines():
+for count,line in enumerate(work.readlines()):
 	match = re.search("([\d\.]+) ([A-Z]) ([A-Z]) ([\d\.]+)",line)
 	if(match is None): continue
 
@@ -377,8 +377,11 @@ for line in work.readlines():
 	dest = match.group(3)
 	duration = float(match.group(4))
 
-	jobQueue.append([fileTime, source, dest, OPEN])
-	jobQueue.append([round(fileTime+duration,6), source, dest, CLOSE])
+	jobQueue.append([fileTime, source, dest, OPEN])						#start of a connection
+	jobQueue.append([round(fileTime+duration,6), source, dest, CLOSE])	#end of a connection
+	circuitRequests = count
+
+print "Count of circuitRequests is",circuitRequests
 
 #Finish parsing workload file
 work.close()
@@ -386,18 +389,41 @@ work.close()
 #sort the job queue chronologically by time
 jobQueue.sort() #I checked the output and this sorts properly :)
 
-while jobQueue:
-	#print startTime
-	if startTime > (jobQueue[0][0]-0.000001):  #for some reason '==' causes infinite loop ...
+while jobQueue and activeConnections:
+
+	#Get events from the jobQueue when the time comes
+	if jobQueue and startTime > (jobQueue[0][0]-0.000001):
 		event = jobQueue.pop(0)
 		status = 'OPEN' if event[3] == 1 else 'CLOSE'
 		print "@",event[0],"connection between",reorder(event[1],event[2]),status
+
+		#if type == open
+			#run algorithm
+			#increase load across the path by some amount
+			#add to active connections
+
+			#if path is occupied then block everything
+
+		#if type == close
+			#check if its in the active connections
+			#if its not then skip
+
+			#if it is then 
+				#remove from there
+				#do statistics 
+				#decrease load by a certain amount
+
+
+
+	#Handle all of the currently active connections
+
 
 	startTime += 0.000001
 
 #end of everything
 
 #Print summary and statistics
+print "Total number of virtual circuit requests"
 print "Number of successfully routed packets: "
 print "Number of blocked packets"
 print "Average number of successfully routed packets"
