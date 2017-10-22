@@ -468,7 +468,7 @@ while jobQueue:
 
 				#decrease load across the path
 				updateGraph(path,-1)
-			else:
+			#else:
 				#print circuitPath,"was blocked so no need to close : ",str(routes[circuitPath])
 				#print sorted(activeRequests)
 				#raw_input()
