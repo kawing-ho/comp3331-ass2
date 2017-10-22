@@ -100,7 +100,7 @@ def dijkstra(source, dest, graph):
 			#choose weight of edge depending on what algo is running
 			if  (algorithm == "SDP"): currentWeight = getDelayOfEdge(currentEdge)
 			#elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)							#only load (old)
-			elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)/float((getCapacityOfEdge))	#ratio (new)
+		elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)/float((getCapacityOfEdge()))	#ratio (new)asdfffffffffffffffffffffffffff
 			else           		    : currentWeight = 1  #for SHP
 
 			#print neighbour,":Considering",currentEdge,"->",currentWeight,"from",currentNode,"with",weightToCurrentNode
@@ -111,7 +111,7 @@ def dijkstra(source, dest, graph):
 			#if that node is already in the PriorityQueue do triangulation
 			if(originalWeight is not None):
 
-				#don't have to change anything if the originalWeight is less 
+				#don't have to change anything if the originalWeight is less
 				if(comparativeWeight < originalWeight):
 
 					#Change the originalWeight in PQ to the comparativeWeight
@@ -144,7 +144,7 @@ def getCapacityOfEdge(edge): return int(Graph[edge]['max'])
 
 
 #===================
-#   MAIN FUNCTION  
+#   MAIN FUNCTION
 #===================
 
 
@@ -269,7 +269,7 @@ while jobQueue:
 				totalDelay += countDelay(path)
 				successfulCircuits += 1
 
-			
+
 		#<Close the connection>
 		# - If the request to open was not blocked decrease the load
 		#elif(type == CLOSE and circuitPath in activeRequests):
