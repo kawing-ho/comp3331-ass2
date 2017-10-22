@@ -434,7 +434,13 @@ while jobQueue:
 			#if path is occupied then block everything
 			if(fullCapacity(path)):
 				#add statistics
+
+				print str(path),"is blocked"
+				print json.dumps(Graph,indent=4)
+
 				blockedPackets += numberOfPackets
+
+				raw_input()
 
 			else:
 
@@ -453,12 +459,17 @@ while jobQueue:
 			
 		#<Close the connection>
 		# - If the request to open was not blocked decrease the load
-		elif(type == CLOSE and circuitPath in activeRequests):
-			#remove from activeRequests
-			activeRequests.remove(circuitPath)
+		#elif(type == CLOSE and circuitPath in activeRequests):
+		else:
+			if(circuitPath in activeRequests):
+				#remove from activeRequests
+				activeRequests.remove(circuitPath)
 
-			#decrease load across the path
-			updateGraph(path,-1)
+				#decrease load across the path
+				updateGraph(path,-1)
+			else:
+				print circuitPath,"was blocked so no need to close : ",str(routes[circuitPath])
+				raw_input()
 
 	startTime += 0.000001
 
