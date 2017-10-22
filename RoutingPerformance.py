@@ -100,7 +100,7 @@ def dijkstra(source, dest, graph):
 			#choose weight of edge depending on what algo is running
 			if  (algorithm == "SDP"): currentWeight = getDelayOfEdge(currentEdge)
 			#elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)							#only load (old)
-		elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)/float((getCapacityOfEdge()))	#ratio (new)asdfffffffffffffffffffffffffff
+			elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)/float(getCapacityOfEdge(currentEdge))	#ratio (new)
 			else           		    : currentWeight = 1  #for SHP
 
 			#print neighbour,":Considering",currentEdge,"->",currentWeight,"from",currentNode,"with",weightToCurrentNode
@@ -229,7 +229,7 @@ while jobQueue:
 		circuitPath = reorder(event[1],event[2])
 
 		status = 'OPEN' if type == 1 else 'CLOSE'
-		print "@",event[0],"connection between",circuitPath,status
+		#print "@",event[0],"connection between",circuitPath,status
 
 		#<Request for connection>
 		# - run algorithm
