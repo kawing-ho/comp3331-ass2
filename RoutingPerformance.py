@@ -99,7 +99,8 @@ def dijkstra(source, dest, graph):
 
 			#choose weight of edge depending on what algo is running
 			if  (algorithm == "SDP"): currentWeight = getDelayOfEdge(currentEdge)
-			elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)
+			#elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)							#only load (old)
+			elif(algorithm == "LLP"): currentWeight = getLoadOfEdge(currentEdge)/float((getCapacityOfEdge))	#ratio (new)
 			else           		    : currentWeight = 1  #for SHP
 
 			#print neighbour,":Considering",currentEdge,"->",currentWeight,"from",currentNode,"with",weightToCurrentNode
@@ -291,8 +292,8 @@ totalPackets = successfulPackets + blockedPackets
 print "\nTotal number of virtual circuit requests:",(requestCount+1)
 print "Total number of packets:",int(totalPackets)
 print "Number of successfully routed packets:",int(successfulPackets)
-print "Percentage of succesfully routed packets:",((float(successfulPackets)/totalPackets)*100),"%"
+print "Percentage of succesfully routed packets:",round(((float(successfulPackets)/totalPackets)*100),2),"%"
 print "Number of blocked packets:",int(blockedPackets)
-print "Percentage of blocked packets:",((float(blockedPackets)/totalPackets)*100),"%"
-print "Average number of hops per circuit:",(float(totalHops)/successfulCircuits)
-print "Average cumulative propagation delay per circuit:",(float(totalDelay)/successfulCircuits)
+print "Percentage of blocked packets:",round(((float(blockedPackets)/totalPackets)*100),2),"%"
+print "Average number of hops per circuit:",round((float(totalHops)/successfulCircuits),2)
+print "Average cumulative propagation delay per circuit:",round((float(totalDelay)/successfulCircuits),2)
