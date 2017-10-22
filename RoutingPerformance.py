@@ -73,6 +73,11 @@ def updateGraph(path, value):
 	for edge in path:
 		Graph[edge]['load'] += value
 
+#returns the total amount of propagation delay for a path in the graph
+#input: a list of edges ["AB","BC",CD"]
+#output: sum of all delay in the list
+def countDelay(path):
+	return sum( [ int(Graph[edge]['delay']) for edge in path ] )
 
 #SHP algorithm
 #Weight = 1 (same across all edges)
@@ -364,6 +369,9 @@ else: LLPTest()
 
 jobQueue = []				#queue of open and close events for connections
 activeRequests = set()
+totalHops = 0
+totalDelay = 0
+successfulCircuits = 0
 
 #Job structure: [TIME_OF_EVENT, SOURCE, DEST, DURATION, TYPE]
 
@@ -386,8 +394,6 @@ work.close()
 
 #sort the job queue chronologically by time
 jobQueue.sort()
-
-#numberOfPackets = floor(duration / timePerPacket)
 
 #This loop ends when the very last connection is closed
 #which is simulated by the last element being popped from the queue
@@ -431,12 +437,18 @@ while jobQueue:
 				blockedPackets += numberOfPackets
 
 			else:
-				#add statistics
-				successfulPackets += numberOfPackets
-				activeRequests.add(circuitPath)
 
 				#increase load across the path
 				updateGraph(path,1)
+
+				#add to set for connection closing
+				activeRequests.add(circuitPath)
+
+				#add statistics
+				successfulPackets += numberOfPackets
+				totalHops += len(path)				#countHops
+				totalDelay += countDelay(path)
+				successfulCircuits += 1
 
 			
 		#<Close the connection>
@@ -460,5 +472,5 @@ print "Number of successfully routed packets:",successfulPackets
 print "Percentage of succesfully routed packets:",((float(successfulPackets)/totalPackets)*100),"%"
 print "Number of blocked packets:",blockedPackets
 print "Percentage of blocked packets:",((float(blockedPackets)/totalPackets)*100),"%"
-print "Average number of hops per circuit:"
-print "Average cumulative propagation delay per circuit:"
+print "Average number of hops per circuit:",(float(totalHops)/successfulCircuits)
+print "Average cumulative propagation delay per circuit:",(float(totalDelay)/successfulCircuits)
