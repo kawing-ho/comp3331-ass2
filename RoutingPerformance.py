@@ -43,7 +43,7 @@ def tuple_compare(a, b):
 
 
 #check if a path has already been computed before for two nodes
-#input: a two-letter route (eg. AG , BC , etc ...)
+#input: a list of edges
 #output: None if not found or Path as a list from Src->Dest
 def checkSaved(route):
 	if(algorithm == "LLP") or (route not in routes.keys()): return None
@@ -58,16 +58,16 @@ def convertPath(path):
  		new.append(reorder(node,path[index+1]))
 	return new
 
-#function which checks a path on a graph whether its full or not
+#function which checks a path on the graph whether its full or not
 #input: a list of edges (eg. ["AB","BC","CD"])
 #output: 1 if its fully occupied, 0 otherwise
 def fullCapacity(path):
 	for edge in path:
 		if(getLoadOfEdge(edge) == getCapacityOfEdge(edge)):
 			return 1
-	else: return 0
+	else: return 0		#for...else loops in Python :D
 
-#function which updates the graphs by adding the value to the specidied edges
+#function which updates the graphs by adding the value to the specified edges
 #input: a list of edge to update and the value to update them with
 def updateGraph(path, value):
 	for edge in path:
@@ -329,7 +329,6 @@ routes = {}						   #route is a dict containing pre-computed paths for chosen so
 scheme = sys.argv[1]
 algorithm = sys.argv[2]
 rate = int(sys.argv[5])            # eg. if rate = 2 it means 2 packets/s
-packetTime = float(1.0 / rate)	   # that means each packet takes 0.5 s to transmit
 
 #defined values for job events
 OPEN  = 1
@@ -420,13 +419,14 @@ while jobQueue:
 			#run algorithm if there's none
 			if(path is None):
 				path = dijkstra(source, dest, Graph)
+				path = convertPath(path)
 				routes[circuitPath] = path
 
 			#count the packets to send/block
-			numberOfPackets = math.floor( duration / packetTime)
+			numberOfPackets = math.floor(rate * duration)
 
 			#if path is occupied then block everything
-			if(fullCapacity(convertPath(path))):
+			if(fullCapacity(path)):
 				#add statistics
 				blockedPackets += numberOfPackets
 
@@ -436,7 +436,7 @@ while jobQueue:
 				activeRequests.add(circuitPath)
 
 				#increase load across the path
-				updateGraph(convertPath(path),1)
+				updateGraph(path,1)
 
 			
 		#<Close the connection>
@@ -446,7 +446,7 @@ while jobQueue:
 			activeRequests.remove(circuitPath)
 
 			#decrease load across the path
-			updateGraph(convertPath(path),-1)
+			updateGraph(path,-1)
 
 	startTime += 0.000001
 
@@ -454,7 +454,7 @@ while jobQueue:
 totalPackets = successfulPackets + blockedPackets
 
 #Print summary and statistics
-print "Total number of virtual circuit requests:",(requestCount+1)
+print "\nTotal number of virtual circuit requests:",(requestCount+1)
 print "Total number of packets:",totalPackets
 print "Number of successfully routed packets:",successfulPackets
 print "Percentage of succesfully routed packets:",((float(successfulPackets)/totalPackets)*100),"%"
